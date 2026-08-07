@@ -1,0 +1,9 @@
+{
+  "MAE": 26.518604252400547,
+  "RMSE": 53.78677216074097,
+  "WAPE": 0.6565440447611345,
+  "Under_Q95": 104.50946969696967,
+  "Under_Max": 395.86742424242425,
+  "interval_90_coverage": 0.9375,
+  "selected_model": "compound_poisson"
+}

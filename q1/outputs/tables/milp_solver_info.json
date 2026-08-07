@@ -1,0 +1,11 @@
+{
+  "status": 1,
+  "success": false,
+  "message": "Time limit reached. (HiGHS Status 13: Time limit reached)",
+  "objective": 0.21399860987790778,
+  "peak_utilization_variable": 0.4927881297446515,
+  "mip_gap": 0.13886385818262312,
+  "mip_node_count": 160,
+  "solve_seconds": 180.1136543750763,
+  "candidate_variables": 34229
+}

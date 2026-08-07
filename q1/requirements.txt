@@ -1,0 +1,7 @@
+pandas==3.0.5
+numpy==2.5.1
+openpyxl==3.1.5
+matplotlib==3.11.1
+scipy==1.18.0
+highspy==1.15.1
+tabulate==0.10.0

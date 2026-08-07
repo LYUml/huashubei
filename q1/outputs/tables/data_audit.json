@@ -1,0 +1,20 @@
+{
+  "task_rows": 50000,
+  "duplicate_task_ids": 0,
+  "exact_duplicate_tasks": 0,
+  "task_null_cells": 0,
+  "arrival_min": 0,
+  "arrival_max": 2399,
+  "gpu_min": 1,
+  "gpu_max": 127,
+  "duration_min": 10,
+  "duration_max": 399,
+  "earliest_equals_arrival": true,
+  "all_nonpreemptive": true,
+  "region_hour_rows": 14442,
+  "region_hour_duplicates": 0,
+  "region_hour_null_cells": 0,
+  "region_hour_min": 0,
+  "region_hour_max": 2406,
+  "last24_tasks": 538
+}
