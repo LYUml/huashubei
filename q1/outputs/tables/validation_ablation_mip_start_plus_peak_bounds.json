@@ -1,0 +1,21 @@
+{
+  "name": "ablation_mip_start_plus_peak_bounds",
+  "scheduled_tasks": 538,
+  "duplicate_task_ids": 0,
+  "missing_assignments": 0,
+  "realtime_start_violations": 0,
+  "arrival_violations": 0,
+  "deadline_violations": 0,
+  "terminal_2406_violations": 0,
+  "latency_violations": 0,
+  "max_gpu_excess": 0.0,
+  "max_it_power_excess_MW": 0.0,
+  "max_facility_power_excess_MW": 0.0,
+  "mean_wait_hour": 0.0,
+  "max_wait_hour": 0.0,
+  "migration_rate": 0.12453531598513011,
+  "tail_task_rate": 0.12639405204460966,
+  "peak_gpu_utilization": 0.5726449275362319,
+  "mean_gpu_utilization": 0.3913589157509121,
+  "all_hard_constraints_pass": true
+}

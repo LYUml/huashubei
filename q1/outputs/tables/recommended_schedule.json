@@ -1,0 +1,10 @@
+{
+  "preferred_scenario": "lexicographic_1.05",
+  "selection_rule": "minimum peak utilization among validated solutions with mean wait <= 0.10 h and MIP gap <= 0.05",
+  "mean_wait_hour": 0.0,
+  "peak_gpu_utilization": 0.5646997929606625,
+  "migration_rate": 0.1226765799256505,
+  "mip_gap": 0.0052835404726156,
+  "all_hard_constraints_pass": true,
+  "carry_in_tasks": 58
+}
