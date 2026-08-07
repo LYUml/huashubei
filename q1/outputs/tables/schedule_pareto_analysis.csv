@@ -1,0 +1,5 @@
+﻿name,scheduled_tasks,duplicate_task_ids,missing_assignments,realtime_start_violations,arrival_violations,deadline_violations,terminal_2406_violations,latency_violations,max_gpu_excess,max_it_power_excess_MW,max_facility_power_excess_MW,mean_wait_hour,max_wait_hour,migration_rate,tail_task_rate,peak_gpu_utilization,mean_gpu_utilization,all_hard_constraints_pass,ParetoEfficient_WaitPeak
+local_first,538,0,0,0,0,0,0,0,0.0,0.0,0.0,0.020446096654275,4.0,0.0,0.1263940520446096,0.999654934437543,0.3722557971230475,True,True
+most_available,538,0,0,0,0,0,0,0,0.0,0.0,0.0,1.1189591078066914,18.0,0.5297397769516728,0.2211895910780669,0.5751482213438734,0.3898822336957527,True,False
+greedy,538,0,0,0,0,0,0,0,0.0,0.0,0.0,0.0650557620817843,5.0,0.0148698884758364,0.1263940520446096,0.9322628458498023,0.372595826437161,True,True
+milp,538,0,0,0,0,0,0,0,0.0,0.0,0.0,0.4126394052044609,17.0,0.037174721189591,0.1505576208178438,0.4927881297446514,0.3863569708564048,True,True

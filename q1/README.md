@@ -8,6 +8,14 @@
 & '.\q1\.venv\Scripts\python.exe' '.\q1\run_q1.py'
 ```
 
+在已有完整求解结果上运行补强分析（无需重新运行 180 秒 MILP）：
+
+```powershell
+& '.\q1\.venv\Scripts\python.exe' '.\q1\strengthen_q1.py'
+```
+
+该脚本生成多层级预测评价、Poisson/负二项计数诊断、调度 Pareto 图，并重写无乱码的 `q1tex.md`。
+
 如果需要重新创建环境：
 
 ```powershell
