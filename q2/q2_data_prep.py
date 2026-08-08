@@ -1,20 +1,23 @@
 """
 问题二：碳感知任务调度模型 —— 数据预处理与特征工程
 ====================================================
-数据文件 (gen_data.py 生成):
+数据文件 (官方附件, 需转换为以下列名):
   workload_trace.xlsx      : TaskID, TaskType, ArrivalHour, GPU_Demand,
                             EstimatedDuration_min, DelaySensitivity,
                             SourceRegion, MaxLatency_ms, LatestFinishHour,
                             EarliestStartHour, ExecutionMode
   region_time_data.xlsx   : Region, Hour, NonAI_IT_Load_MW,
-                            Baseline_AI_IT_Load_MW, IT_Load_MW, Facility_Load_MW
+                            Baseline_AI_IT_Load_MW, IT_Load_MW, Total_Load_MW
   network_latency.xlsx    : SourceRegion, TargetRegion, Latency_ms
-  power_mapping.xlsx      : TaskType, PowerPerGPU_MW
+  power_mapping.xlsx      : TaskType, GPU_Power_MW_per_EquivalentGPU
   gpu_information.xlsx    : Region, Available_GPU, Max_IT_Power_MW,
                             Max_Facility_Power_MW, PUE
   carbon_intensity.xlsx   : Region, Hour, CarbonIntensity_tCO2_per_MWh
-  electricity_price.xlsx  : Region, Hour, Price_Yuan_per_MWh
+                            （由 region_time_data 拆分）
+  electricity_price.xlsx  : Region, Hour, ElectricityPrice_CNY_per_MWh
+                            （由 region_time_data 拆分）
   renewable_generation.xlsx: Region, Hour, AvailableRenewable_MW
+                            （由 region_time_data 拆分）
 """
 
 import pandas as pd
