@@ -1,0 +1,6 @@
+Loading data...
+Running baseline strategies (local_first / lowest_price / lowest_carbon / joint)...
+  [local_first] scheduling 1/50000
+  [local_first] scheduling 5000/50000
+  [local_first] scheduling 10000/50000
+  [local_first] scheduling 15000/50000

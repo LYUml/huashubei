@@ -1,0 +1,32 @@
+{
+  "n_tasks": 2137,
+  "operating_cost_CNY": 1340700620.0897014,
+  "carbon_tCO2": 1508590.6722137644,
+  "mean_network_latency_ms": 5.0,
+  "qos_loss": 0.014506317267197005,
+  "mean_wait_hour": 0.014506317267197005,
+  "migration_rate": 0.0,
+  "realtime_on_time_rate": 1.0,
+  "renewable_utilization": 1.0,
+  "peak_net_import_sum_MW": 2568.4415995833333,
+  "peak_net_import_by_region_MW": {
+    "RegionA": 550.0,
+    "RegionB": 520.0,
+    "RegionC": 510.0,
+    "RegionD": 440.58540000000005,
+    "RegionE": 276.96179958333335,
+    "RegionF": 270.8944000000001
+  },
+  "deadline_violation": 0,
+  "latency_violation": 0,
+  "scenario": "baseline_local_first",
+  "strategy": "local_first",
+  "hard_pass": true,
+  "resource_checks": {
+    "max_gpu_excess": 0.0,
+    "max_it_excess_MW": 0.0,
+    "max_facility_excess_MW": 0.0,
+    "finish_after_2406": 0,
+    "hard_pass": true
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "n_tasks": 2137,
+  "operating_cost_CNY": 1100448014.0797098,
+  "carbon_tCO2": 1397299.6189645494,
+  "mean_network_latency_ms": 25.537201684604586,
+  "qos_loss": 0.6172204024333178,
+  "mean_wait_hour": 0.3472157229761348,
+  "migration_rate": 0.540009358914366,
+  "realtime_on_time_rate": 1.0,
+  "renewable_utilization": 0.9949550318854057,
+  "peak_net_import_sum_MW": 2393.7720732123475,
+  "peak_net_import_by_region_MW": {
+    "RegionA": 550.0,
+    "RegionB": 520.0,
+    "RegionC": 503.63571999999994,
+    "RegionD": 289.3863994623474,
+    "RegionE": 261.6041870833333,
+    "RegionF": 269.14576666666676
+  },
+  "deadline_violation": 0,
+  "latency_violation": 0,
+  "scenario": "re_plus20",
+  "strategy": "joint",
+  "hard_pass": true,
+  "resource_checks": {
+    "hard_pass": true
+  }
+}

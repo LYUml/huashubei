@@ -1,0 +1,15 @@
+{
+  "preferred_scenario": "baseline_joint",
+  "selection_rule": "joint two-stage co-optimization minimizing operating cost under physical constraints; scenarios compare carbon budgets, price mechanisms, and renewable volatility",
+  "operating_cost_CNY": 1337743076.401438,
+  "carbon_tCO2": 1503647.377064048,
+  "renewable_utilization": 1.0,
+  "peak_net_import_sum_MW": 2730.5854,
+  "mean_wait_hour": 0.3472157229761348,
+  "mean_network_latency_ms": 25.537201684604586,
+  "qos_loss": 0.6172204024333178,
+  "hard_pass": true,
+  "elapsed_seconds": 109.93101119995117,
+  "fast_mode": true,
+  "n_tasks_scheduled": 2137
+}
