@@ -1,0 +1,131 @@
+Loading data...
+Running baseline strategies (local_first / lowest_price / lowest_carbon / joint)...
+  [local_first] scheduling 1/50000
+  [local_first] scheduling 5000/50000
+  [local_first] scheduling 10000/50000
+  [local_first] scheduling 15000/50000
+  [local_first] scheduling 20000/50000
+  [local_first] scheduling 25000/50000
+  [local_first] scheduling 30000/50000
+  [local_first] scheduling 35000/50000
+  [local_first] scheduling 40000/50000
+  [local_first] scheduling 45000/50000
+  [local_first] scheduling 50000/50000
+  [lowest_price] scheduling 1/50000
+  [lowest_price] scheduling 5000/50000
+  [lowest_price] scheduling 10000/50000
+  [lowest_price] scheduling 15000/50000
+  [lowest_price] scheduling 20000/50000
+  [lowest_price] scheduling 25000/50000
+  [lowest_price] scheduling 30000/50000
+  [lowest_price] scheduling 35000/50000
+  [lowest_price] scheduling 40000/50000
+  [lowest_price] scheduling 45000/50000
+  [lowest_price] scheduling 50000/50000
+  [lowest_carbon] scheduling 1/50000
+  [lowest_carbon] scheduling 5000/50000
+  [lowest_carbon] scheduling 10000/50000
+  [lowest_carbon] scheduling 15000/50000
+  [lowest_carbon] scheduling 20000/50000
+  [lowest_carbon] scheduling 25000/50000
+  [lowest_carbon] scheduling 30000/50000
+  [lowest_carbon] scheduling 35000/50000
+  [lowest_carbon] scheduling 40000/50000
+  [lowest_carbon] scheduling 45000/50000
+  [lowest_carbon] scheduling 50000/50000
+  [joint] scheduling 1/50000
+  [joint] scheduling 5000/50000
+  [joint] scheduling 10000/50000
+  [joint] scheduling 15000/50000
+  [joint] scheduling 20000/50000
+  [joint] scheduling 25000/50000
+  [joint] scheduling 30000/50000
+  [joint] scheduling 35000/50000
+  [joint] scheduling 40000/50000
+  [joint] scheduling 45000/50000
+  [joint] scheduling 50000/50000
+Running carbon / price / renewable scenarios...
+  [lowest_carbon] scheduling 1/50000
+  [lowest_carbon] scheduling 5000/50000
+  [lowest_carbon] scheduling 10000/50000
+  [lowest_carbon] scheduling 15000/50000
+  [lowest_carbon] scheduling 20000/50000
+  [lowest_carbon] scheduling 25000/50000
+  [lowest_carbon] scheduling 30000/50000
+  [lowest_carbon] scheduling 35000/50000
+  [lowest_carbon] scheduling 40000/50000
+  [lowest_carbon] scheduling 45000/50000
+  [lowest_carbon] scheduling 50000/50000
+  [lowest_carbon] scheduling 1/50000
+  [lowest_carbon] scheduling 5000/50000
+  [lowest_carbon] scheduling 10000/50000
+  [lowest_carbon] scheduling 15000/50000
+  [lowest_carbon] scheduling 20000/50000
+  [lowest_carbon] scheduling 25000/50000
+  [lowest_carbon] scheduling 30000/50000
+  [lowest_carbon] scheduling 35000/50000
+  [lowest_carbon] scheduling 40000/50000
+  [lowest_carbon] scheduling 45000/50000
+  [lowest_carbon] scheduling 50000/50000
+  [lowest_carbon] scheduling 1/50000
+  [lowest_carbon] scheduling 5000/50000
+  [lowest_carbon] scheduling 10000/50000
+  [lowest_carbon] scheduling 15000/50000
+  [lowest_carbon] scheduling 20000/50000
+  [lowest_carbon] scheduling 25000/50000
+  [lowest_carbon] scheduling 30000/50000
+  [lowest_carbon] scheduling 35000/50000
+  [lowest_carbon] scheduling 40000/50000
+  [lowest_carbon] scheduling 45000/50000
+  [lowest_carbon] scheduling 50000/50000
+  [joint] scheduling 1/50000
+  [joint] scheduling 5000/50000
+  [joint] scheduling 10000/50000
+  [joint] scheduling 15000/50000
+  [joint] scheduling 20000/50000
+  [joint] scheduling 25000/50000
+  [joint] scheduling 30000/50000
+  [joint] scheduling 35000/50000
+  [joint] scheduling 40000/50000
+  [joint] scheduling 45000/50000
+  [joint] scheduling 50000/50000
+  [joint] scheduling 1/50000
+  [joint] scheduling 5000/50000
+  [joint] scheduling 10000/50000
+  [joint] scheduling 15000/50000
+  [joint] scheduling 20000/50000
+  [joint] scheduling 25000/50000
+  [joint] scheduling 30000/50000
+  [joint] scheduling 35000/50000
+  [joint] scheduling 40000/50000
+  [joint] scheduling 45000/50000
+  [joint] scheduling 50000/50000
+  [joint] scheduling 1/50000
+  [joint] scheduling 5000/50000
+  [joint] scheduling 10000/50000
+  [joint] scheduling 15000/50000
+  [joint] scheduling 20000/50000
+  [joint] scheduling 25000/50000
+  [joint] scheduling 30000/50000
+  [joint] scheduling 35000/50000
+  [joint] scheduling 40000/50000
+  [joint] scheduling 45000/50000
+  [joint] scheduling 50000/50000
+Plotting...
+{
+  "preferred_scenario": "baseline_joint",
+  "selection_rule": "joint two-stage co-optimization minimizing operating cost under physical constraints; scenarios compare carbon budgets, price mechanisms, and renewable volatility",
+  "operating_cost_CNY": 1632012953.4730585,
+  "carbon_tCO2": 1611850.536671484,
+  "renewable_utilization": 1.0,
+  "peak_net_import_sum_MW": 2730.5854,
+  "mean_wait_hour": 0.27208,
+  "mean_network_latency_ms": 25.89244,
+  "qos_loss": 0.54637,
+  "hard_pass": true,
+  "elapsed_seconds": 1409.3668265342712,
+  "fast_mode": false,
+  "n_tasks_scheduled": 50000
+}
+Done in 1411.2s. Outputs written to /workspace/q4/outputs
+EXIT:0
