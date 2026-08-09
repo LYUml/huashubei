@@ -27,9 +27,16 @@ def schedule_qos_metrics(schedule: pd.DataFrame) -> dict:
 def aggregate_power_metrics(region_results: list[dict], schedule_metrics: dict) -> dict:
     cost = sum(r["cost"] for r in region_results)
     carbon = sum(r["carbon"] for r in region_results)
-    re_num = sum(float((r["available_re"] - r["curtailment"]).sum()) for r in region_results)
-    re_den = sum(float(r["available_re"].sum()) for r in region_results)
-    util = re_num / re_den if re_den > 1e-9 else 1.0
+    # Absorbed RE = operational available − LP curtailment
+    # (attachment: utilized = AvailableRE − Curtailment).
+    absorbed = sum(float((r["available_re"] - r["curtailment"]).sum()) for r in region_results)
+    deliverable = sum(float(r["available_re"].sum()) for r in region_results)
+    raw = sum(float(r.get("available_re_raw", r["available_re"]).sum()) for r in region_results)
+    # Headline utilization vs attachment AvailableRenewable (not the LP ceiling).
+    # Using the deliverable ceiling as denominator yields ~100% by construction and
+    # is misleading; keep it only as an operational fill-rate diagnostic.
+    util_raw = absorbed / raw if raw > 1e-9 else 0.0
+    util_deliv = absorbed / deliverable if deliverable > 1e-9 else 0.0
     peaks = {r["region"]: float(r["peak_net_import"]) for r in region_results}
     peak_sum = float(sum(peaks.values()))
     # QoS loss: mean wait + migration penalty (smaller better). Realtime must stay perfect.
@@ -43,7 +50,12 @@ def aggregate_power_metrics(region_results: list[dict], schedule_metrics: dict) 
         "mean_wait_hour": schedule_metrics["mean_wait_hour"],
         "migration_rate": schedule_metrics["migration_rate"],
         "realtime_on_time_rate": schedule_metrics["realtime_on_time_rate"],
-        "renewable_utilization": util,
+        "renewable_utilization": util_raw,
+        "renewable_utilization_of_deliverable": util_deliv,
+        "absorbed_re_mwh": absorbed,
+        "available_re_raw_mwh": raw,
+        "available_re_deliverable_mwh": deliverable,
+        "curtail_deliverable_mwh": deliverable - absorbed,
         "peak_net_import_sum_MW": peak_sum,
         "peak_net_import_by_region_MW": peaks,
         "deadline_violation": schedule_metrics["deadline_violation"],
@@ -88,6 +100,9 @@ def save_region_timeseries(region_results: list[dict], path: Path) -> pd.DataFra
                     "Region": r["region"],
                     "TotalLoad_MW": float(r["total_load"][t]),
                     "AvailableRE_MW": float(r["available_re"][t]),
+                    "AvailableRE_Raw_MW": float(
+                        r.get("available_re_raw", r["available_re"])[t]
+                    ),
                     "GridPurchase_MW": float(r["grid_purchase"][t]),
                     "GridSell_MW": float(r["grid_sell"][t]),
                     "UsedRE_MW": float(r["used_re"][t]),

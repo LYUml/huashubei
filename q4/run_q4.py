@@ -80,6 +80,11 @@ def main() -> None:
         "operating_cost_CNY": float(rec["operating_cost_CNY"]),
         "carbon_tCO2": float(rec["carbon_tCO2"]),
         "renewable_utilization": float(rec["renewable_utilization"]),
+        "renewable_utilization_of_deliverable": float(
+            rec.get("renewable_utilization_of_deliverable", float("nan"))
+        ),
+        "absorbed_re_mwh": float(rec.get("absorbed_re_mwh", float("nan"))),
+        "available_re_raw_mwh": float(rec.get("available_re_raw_mwh", float("nan"))),
         "peak_net_import_sum_MW": float(rec["peak_net_import_sum_MW"]),
         "mean_wait_hour": float(rec["mean_wait_hour"]),
         "mean_network_latency_ms": float(rec["mean_network_latency_ms"]),
@@ -110,6 +115,7 @@ def main() -> None:
         "operating_cost_CNY",
         "carbon_tCO2",
         "renewable_utilization",
+        "renewable_utilization_of_deliverable",
         "peak_net_import_sum_MW",
         "mean_wait_hour",
         "mean_network_latency_ms",

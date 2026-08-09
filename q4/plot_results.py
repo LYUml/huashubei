@@ -13,7 +13,7 @@ def plot_scenario_bars(summary: pd.DataFrame, path: Path) -> None:
     metrics = [
         ("operating_cost_CNY", "Operating cost (CNY)"),
         ("carbon_tCO2", "Carbon (tCO2)"),
-        ("renewable_utilization", "RE utilization"),
+        ("renewable_utilization", "RE util vs AvailableRE"),
         ("peak_net_import_sum_MW", "Peak net-import sum (MW)"),
         ("mean_wait_hour", "Mean wait (h)"),
         ("mean_network_latency_ms", "Mean latency (ms)"),

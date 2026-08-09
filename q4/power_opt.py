@@ -170,8 +170,10 @@ def optimize_region_power(
     used_re = np.maximum(utilized - re_ch - sell_from_re, 0.0)
     grid_ch = np.maximum(charge - re_ch, 0.0)
 
+    # Operational fill-rate only; headline utilization vs raw AvailableRE is
+    # computed in metrics.aggregate_power_metrics.
     re_den = float(avail.sum())
-    util = float(utilized.sum() / re_den) if re_den > 1e-9 else 1.0
+    util_deliv = float(utilized.sum() / re_den) if re_den > 1e-9 else 0.0
 
     return {
         "region": REGIONS[region_idx],
@@ -179,7 +181,7 @@ def optimize_region_power(
         "objective": float(h.getObjectiveValue()),
         "cost": float(np.dot(gp, price) - np.dot(gs, sell_p)),
         "carbon": float(np.dot(gp, ci)),
-        "re_utilization": util,
+        "re_utilization_of_deliverable": util_deliv,
         "peak_net_import": float(net.max()) if len(net) else 0.0,
         "mean_net_import": float(net.mean()) if len(net) else 0.0,
         "grid_purchase": gp,
@@ -207,6 +209,7 @@ def optimize_all_regions(
     time_limit: float = 20.0,
 ) -> list[dict]:
     re = data.available_re if available_re is None else available_re
+    re_raw = data.available_re_raw
     totals = []
     loads = []
     for r in range(len(REGIONS)):
@@ -243,5 +246,6 @@ def optimize_all_regions(
             min_re_utilization=min_re_utilization,
             time_limit=time_limit,
         )
+        res["available_re_raw"] = re_raw[r].copy()
         results.append(res)
     return results

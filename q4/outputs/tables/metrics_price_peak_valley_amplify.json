@@ -7,7 +7,7 @@
   "mean_wait_hour": 0.27036,
   "migration_rate": 0.5489,
   "realtime_on_time_rate": 1.0,
-  "renewable_utilization": 1.0,
+  "renewable_utilization": 0.3286225213082708,
   "peak_net_import_sum_MW": 2631.2543,
   "peak_net_import_by_region_MW": {
     "RegionA": 550.0,
@@ -28,5 +28,10 @@
     "max_facility_excess_MW": 0.0,
     "finish_after_2406": 0,
     "hard_pass": true
-  }
+  },
+  "renewable_utilization_of_deliverable": 1.0,
+  "absorbed_re_mwh": 3795842.621511,
+  "available_re_raw_mwh": 11550768.36,
+  "available_re_deliverable_mwh": 3795842.621511,
+  "curtail_deliverable_mwh": 0.0
 }

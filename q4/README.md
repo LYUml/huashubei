@@ -17,8 +17,14 @@
 
 ### 新能源口径说明
 
-附件中 `AvailableRenewable_MW` 在六个区域逐时完全相同，若按区域独立使用会六倍重复计算系统新能源。本实现采用各区域基准**可消纳上界**  
-`UsedRenewable + RenewableCharge + GridSell`，且不超过附件 `AvailableRenewable`。
+附件中 `AvailableRenewable_MW` 在六个区域逐时完全相同，若按区域独立写入能量平衡会六倍重复计算系统新能源。本实现：
+
+- **调度/LP 上界**：各区域基准可消纳上界 `UsedRenewable + RenewableCharge + GridSell`（且不超过附件 `AvailableRenewable`）。
+- **利用率指标（headline）**：`消纳量 / 附件 AvailableRenewable`（六区加总）。消纳量 = 可消纳上界 − LP 弃光。  
+  此前若用「可消纳上界」做分母，会在弃光≈0 时得到接近 **100%**，这是口径自洽而非真实利用率，已纠正。
+- **诊断指标**：`renewable_utilization_of_deliverable` 表示 LP 对可消纳上界的填充率（可接近 100%）。
+
+注意：附件 AvailableRenewable 六区重复，按六区加总作分母时利用率会系统性偏低（约三分之一量级）；这是数据口径选择，不是把弃光算成零。
 
 ## 运行方式
 

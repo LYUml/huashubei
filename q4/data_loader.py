@@ -29,6 +29,7 @@ class Q4Data:
     sell_price: np.ndarray
     carbon: np.ndarray
     available_re: np.ndarray
+    available_re_raw: np.ndarray
     non_ai: np.ndarray
     gpu_cap: np.ndarray
     max_it: np.ndarray
@@ -74,12 +75,12 @@ def load_data() -> Q4Data:
     sell_price = pivot("SellPrice_CNY_per_MWh")
     carbon = pivot("CarbonIntensity_tCO2_per_MWh")
     # Attachment AvailableRenewable_MW is identical across all six regions
-    # (~800 MW mean), which is inconsistent with regional SellLimit and baseline
-    # absorption. Using it per-region would 6×-count system renewables and force
-    # near-zero grid purchase. We therefore take each region's baseline
-    # *deliverable* renewable upper bound:
+    # (~800 MW mean). Using it per-region in the energy balance would 6×-count
+    # system renewables and force near-zero grid purchase. The LP therefore uses
+    # each region's baseline *deliverable* ceiling:
     #   UsedRenewable + RenewableCharge + GridSell
-    # and never exceed the attachment AvailableRenewable value.
+    # capped by attachment AvailableRenewable. Raw AvailableRenewable is kept
+    # separately for reporting utilization (消纳 / 附件可用出力).
     available_raw = pivot("AvailableRenewable_MW")
     used = pivot("UsedRenewable_MW")
     re_ch = pivot("RenewableCharge_MW")
@@ -109,6 +110,7 @@ def load_data() -> Q4Data:
         sell_price=sell_price,
         carbon=carbon,
         available_re=available_re,
+        available_re_raw=available_raw,
         non_ai=non_ai,
         gpu_cap=info["Available_GPU"].to_numpy(float),
         max_it=info["Max_IT_Power_MW"].to_numpy(float),
@@ -155,4 +157,11 @@ def apply_price_mechanism(data: Q4Data, mechanism: str) -> Q4Data:
 
 
 def scale_renewables(data: Q4Data, factor: float) -> Q4Data:
-    return Q4Data(**{**data.__dict__, "available_re": data.available_re * float(factor)})
+    f = float(factor)
+    return Q4Data(
+        **{
+            **data.__dict__,
+            "available_re": data.available_re * f,
+            "available_re_raw": data.available_re_raw * f,
+        }
+    )
