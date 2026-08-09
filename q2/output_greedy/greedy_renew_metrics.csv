@@ -1,0 +1,2 @@
+scheme,cost_yuan,carbon_tco2,avg_latency_ms,renew_utilization,migrated,n_tasks,weights
+greedy_renew,383645991.9792585,340127.5971897031,35.8689693563779,0.09320471435720182,37724,50000,"(0.1, 0.1, 0.1, 1.0)"
