@@ -1,0 +1,33 @@
+{
+  "n_tasks": 50000,
+  "operating_cost_CNY": 1347424330.3975036,
+  "carbon_tCO2": 1440016.3384274833,
+  "mean_network_latency_ms": 25.89244,
+  "qos_loss": 0.54637,
+  "mean_wait_hour": 0.27208,
+  "migration_rate": 0.54858,
+  "realtime_on_time_rate": 1.0,
+  "renewable_utilization": 0.3284430043483488,
+  "peak_net_import_sum_MW": 2585.4127875166664,
+  "peak_net_import_by_region_MW": {
+    "RegionA": 550.0,
+    "RegionB": 520.0,
+    "RegionC": 508.20811999999995,
+    "RegionD": 336.21333375999995,
+    "RegionE": 336.9225,
+    "RegionF": 334.06883375666666
+  },
+  "deadline_violation": 0,
+  "latency_violation": 0,
+  "scenario": "re_plus20",
+  "strategy": "joint",
+  "hard_pass": true,
+  "resource_checks": {
+    "hard_pass": true
+  },
+  "renewable_utilization_of_deliverable": 0.9994537289799638,
+  "absorbed_re_mwh": 4552522.8752283,
+  "available_re_raw_mwh": 13860922.032000002,
+  "available_re_deliverable_mwh": 4555011.1458132,
+  "curtail_deliverable_mwh": 2488.270584899932
+}
