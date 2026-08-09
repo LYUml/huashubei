@@ -1,0 +1,70 @@
+% 独立预览文件；不会被 paper_overleaf/main.tex 引用。
+\documentclass[UTF8,a4paper,zihao=-4]{ctexart}
+\usepackage{geometry}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+\geometry{left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm}
+\pagestyle{empty}
+
+\begin{document}
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\caption{附件数据的结构与主要用途}
+\label{tab:global-data-overview}
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.28}
+\begin{tabularx}{\textwidth}{@{}
+    >{\raggedright\arraybackslash}p{3.45cm}
+    >{\raggedright\arraybackslash}p{2.30cm}
+    >{\raggedright\arraybackslash}p{3.05cm}
+    >{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{数据文件} &
+\textbf{数据规模与粒度} &
+\textbf{主要关联字段} &
+\textbf{主要建模用途} \\
+\midrule
+{\scriptsize\nolinkurl{workload_trace.xlsx}}
+& $50\,000$条任务
+& \texttt{TaskID}、\texttt{TaskType}、\texttt{SourceRegion}
+& 提供任务到达时刻、GPU需求、执行时长、来源区域、时延阈值及完成期限 \\
+\addlinespace[2pt]
+
+{\scriptsize\nolinkurl{GPU_information.xlsx}}
+& $6$个区域
+& \texttt{Region}
+& 提供可调度GPU容量、IT功率上限、PUE及设施侧功率上限 \\
+\addlinespace[2pt]
+
+{\scriptsize\nolinkurl{network_latency.xlsx}}
+& $36$个区域对
+& \texttt{FromRegion}、\texttt{ToRegion}
+& 形成区域间网络时延矩阵，判断跨区域执行的时延可行性 \\
+\addlinespace[2pt]
+
+{\scriptsize\nolinkurl{power_mapping.xlsx}}
+& $3$类任务
+& \texttt{TaskType}
+& 将任务占用的等效GPU数量转换为AI IT功率 \\
+\addlinespace[2pt]
+
+{\scriptsize\nolinkurl{region_time_data.xlsx}}
+& $6\times2407$条区域--小时记录
+& \texttt{Region}、\texttt{Hour}
+& 提供逐时电价、售电价格、碳强度、可用新能源、非AI负荷及基准运行状态 \\
+\addlinespace[2pt]
+
+{\scriptsize\nolinkurl{storage_information.xlsx}}
+& $6$个区域
+& \texttt{Region}
+& 提供储能容量、SOC边界、初始SOC、充放电功率、效率及购售电边界 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\end{document}

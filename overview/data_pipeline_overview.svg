@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <defs>
+    <style>
+      .title { font-family: "PingFang SC"; font-size: 34px; font-weight: 600; fill: #17324d; }
+      .subtitle { font-family: "PingFang SC"; font-size: 17px; font-weight: 400; fill: #60758a; }
+      .group { font-family: "PingFang SC"; font-size: 22px; font-weight: 600; fill: #27445f; }
+      .name { font-family: "PingFang SC"; font-size: 18px; font-weight: 600; fill: #17324d; }
+      .desc { font-family: "PingFang SC"; font-size: 14px; font-weight: 400; fill: #546a7d; }
+      .qname { font-family: "PingFang SC"; font-size: 18px; font-weight: 600; fill: #ffffff; }
+      .qdesc { font-family: "PingFang SC"; font-size: 13px; font-weight: 400; fill: #edf5fb; }
+      .source-task { fill: #edf5ff; stroke: #76a7d8; stroke-width: 2; }
+      .source-power { fill: #edf9f3; stroke: #73ad8d; stroke-width: 2; }
+      .process { fill: #f7f9fb; stroke: #9aabba; stroke-width: 2; }
+      .output { fill: #fff5e8; stroke: #d9a25b; stroke-width: 2; }
+      .q1 { fill: #477fae; }
+      .q2 { fill: #3c8870; }
+      .q3 { fill: #b27b3f; }
+      .q4 { fill: #745f9c; }
+      .arrow { fill: none; stroke: #8094a6; stroke-width: 2.5; marker-end: url(#arrow); }
+      .arrow-soft { fill: none; stroke: #a8b6c2; stroke-width: 2; marker-end: url(#arrow-soft); }
+      .divider { stroke: #d7e0e7; stroke-width: 2; }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#8094a6"/>
+    </marker>
+    <marker id="arrow-soft" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#a8b6c2"/>
+    </marker>
+  </defs>
+
+  <rect width="1600" height="900" fill="#ffffff"/>
+  <text x="800" y="52" text-anchor="middle" class="title">算电协同问题的数据关联与预处理框架</text>
+  <text x="800" y="82" text-anchor="middle" class="subtitle">由六类官方附件形成任务级、区域级与区域—小时级统一建模数据</text>
+
+  <text x="205" y="128" text-anchor="middle" class="group">原始数据</text>
+  <text x="785" y="128" text-anchor="middle" class="group">统一预处理</text>
+  <text x="1320" y="128" text-anchor="middle" class="group">建模数据与问题接口</text>
+  <line x1="430" y1="106" x2="430" y2="850" class="divider"/>
+  <line x1="1110" y1="106" x2="1110" y2="850" class="divider"/>
+
+  <!-- source data -->
+  <rect x="55" y="160" rx="14" width="305" height="82" class="source-task"/>
+  <text x="78" y="191" class="name">workload_trace.xlsx</text>
+  <text x="78" y="218" class="desc">50,000 条任务 · 到达、需求、时长与 SLA</text>
+
+  <rect x="55" y="260" rx="14" width="305" height="82" class="source-task"/>
+  <text x="78" y="291" class="name">network_latency.xlsx</text>
+  <text x="78" y="318" class="desc">6×6 区域对 · 单向等效网络时延</text>
+
+  <rect x="55" y="360" rx="14" width="305" height="82" class="source-task"/>
+  <text x="78" y="391" class="name">power_mapping.xlsx</text>
+  <text x="78" y="418" class="desc">3 类任务 · 单位等效 GPU 的 IT 功率</text>
+
+  <rect x="55" y="500" rx="14" width="305" height="82" class="source-power"/>
+  <text x="78" y="531" class="name">GPU_information.xlsx</text>
+  <text x="78" y="558" class="desc">6 个区域 · GPU、功率容量与 PUE</text>
+
+  <rect x="55" y="600" rx="14" width="305" height="82" class="source-power"/>
+  <text x="78" y="631" class="name">region_time_data.xlsx</text>
+  <text x="78" y="658" class="desc">6×2407 · 电价、碳、新能源、负荷与基准状态</text>
+
+  <rect x="55" y="700" rx="14" width="305" height="82" class="source-power"/>
+  <text x="78" y="731" class="name">storage_information.xlsx</text>
+  <text x="78" y="758" class="desc">6 个区域 · SOC、充放电效率与购售电边界</text>
+
+  <!-- preprocessing -->
+  <rect x="505" y="160" rx="14" width="555" height="92" class="process"/>
+  <text x="535" y="192" class="name">① 完整性与主键检查</text>
+  <text x="535" y="220" class="desc">检查缺失、重复、取值范围及 Region、Hour、TaskID 的唯一性</text>
+
+  <rect x="505" y="277" rx="14" width="555" height="92" class="process"/>
+  <text x="535" y="309" class="name">② 时间轴对齐</text>
+  <text x="535" y="337" class="desc">区分主时域 0–2399、任务收尾 2400–2405 与终端结算 2406</text>
+
+  <rect x="505" y="394" rx="14" width="555" height="92" class="process"/>
+  <text x="535" y="426" class="name">③ 跨表关联与字段角色划分</text>
+  <text x="535" y="454" class="desc">区分外生输入、基准状态和基准结果；按任务类型、区域和时段关联</text>
+
+  <rect x="505" y="511" rx="14" width="555" height="92" class="process"/>
+  <text x="535" y="543" class="name">④ 任务属性与负荷转换</text>
+  <text x="535" y="571" class="desc">生成候选执行区域、小时重叠系数、GPU-hour 与 AI IT 功率</text>
+
+  <rect x="505" y="628" rx="14" width="555" height="112" class="process"/>
+  <text x="535" y="660" class="name">⑤ 物理一致性与特殊口径</text>
+  <text x="535" y="688" class="desc">核验 IT—设施负荷、功率平衡和 SOC 递推；记录 RegionE 局部残差</text>
+  <text x="535" y="714" class="desc">保留新能源原始输入，具体区域使用与统计口径在对应模型中说明</text>
+
+  <!-- outputs -->
+  <rect x="1170" y="165" rx="14" width="330" height="88" class="output"/>
+  <text x="1196" y="197" class="name">任务级建模表</text>
+  <text x="1196" y="224" class="desc">任务属性、候选区域、功率与时间边界</text>
+
+  <rect x="1170" y="287" rx="14" width="330" height="88" class="output"/>
+  <text x="1196" y="319" class="name">区域静态参数表</text>
+  <text x="1196" y="346" class="desc">算力、PUE、功率上限、时延与储能边界</text>
+
+  <rect x="1170" y="409" rx="14" width="330" height="88" class="output"/>
+  <text x="1196" y="441" class="name">区域—小时参数表</text>
+  <text x="1196" y="468" class="desc">固定负荷、电价、碳强度与新能源输入</text>
+
+  <rect x="1145" y="565" rx="14" width="170" height="105" class="q1"/>
+  <text x="1230" y="597" text-anchor="middle" class="qname">问题一</text>
+  <text x="1230" y="625" text-anchor="middle" class="qdesc">需求预测</text>
+  <text x="1230" y="647" text-anchor="middle" class="qdesc">基础算力调度</text>
+
+  <rect x="1330" y="565" rx="14" width="170" height="105" class="q2"/>
+  <text x="1415" y="597" text-anchor="middle" class="qname">问题二</text>
+  <text x="1415" y="625" text-anchor="middle" class="qdesc">碳感知任务调度</text>
+  <text x="1415" y="647" text-anchor="middle" class="qdesc">多目标权衡</text>
+
+  <rect x="1145" y="690" rx="14" width="170" height="105" class="q3"/>
+  <text x="1230" y="722" text-anchor="middle" class="qname">问题三</text>
+  <text x="1230" y="750" text-anchor="middle" class="qdesc">固定计算负荷</text>
+  <text x="1230" y="772" text-anchor="middle" class="qdesc">储能协同优化</text>
+
+  <rect x="1330" y="690" rx="14" width="170" height="105" class="q4"/>
+  <text x="1415" y="722" text-anchor="middle" class="qname">问题四</text>
+  <text x="1415" y="750" text-anchor="middle" class="qdesc">算—储—电联合优化</text>
+  <text x="1415" y="772" text-anchor="middle" class="qdesc">多情景比较</text>
+
+  <!-- arrows -->
+  <path d="M360 201 C425 201, 438 206, 505 206" class="arrow-soft"/>
+  <path d="M360 301 C425 301, 440 323, 505 323" class="arrow-soft"/>
+  <path d="M360 401 C425 401, 440 440, 505 440" class="arrow-soft"/>
+  <path d="M360 541 C425 541, 440 557, 505 557" class="arrow-soft"/>
+  <path d="M360 641 C425 641, 440 684, 505 684" class="arrow-soft"/>
+  <path d="M360 741 C425 741, 445 708, 505 708" class="arrow-soft"/>
+
+  <path d="M782 252 L782 277" class="arrow"/>
+  <path d="M782 369 L782 394" class="arrow"/>
+  <path d="M782 486 L782 511" class="arrow"/>
+  <path d="M782 603 L782 628" class="arrow"/>
+
+  <path d="M1060 440 C1115 440, 1125 209, 1170 209" class="arrow-soft"/>
+  <path d="M1060 557 C1110 557, 1125 331, 1170 331" class="arrow-soft"/>
+  <path d="M1060 684 C1115 684, 1125 453, 1170 453" class="arrow-soft"/>
+
+  <path d="M1335 253 L1335 540" class="arrow-soft"/>
+  <path d="M1335 375 L1335 540" class="arrow-soft"/>
+  <path d="M1335 497 L1335 540" class="arrow-soft"/>
+  <path d="M1335 540 L1230 565" class="arrow-soft"/>
+  <path d="M1335 540 L1415 565" class="arrow-soft"/>
+  <path d="M1335 540 L1230 690" class="arrow-soft"/>
+  <path d="M1335 540 L1415 690" class="arrow-soft"/>
+
+  <text x="800" y="846" text-anchor="middle" class="subtitle">初稿示意：后续可按论文版式压缩为横向单图，并统一字体、线宽与图注</text>
+</svg>
