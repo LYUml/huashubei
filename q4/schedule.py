@@ -10,6 +10,7 @@ from config import EXECUTION_END, REGIONS
 from data_loader import Q4Data
 
 Strategy = Literal["joint", "local_first", "lowest_price", "lowest_carbon"]
+REGION_INDEX = {r: i for i, r in enumerate(REGIONS)}
 
 
 def overlap_fraction(start_hour: int, duration_min: int, hour: int) -> float:
@@ -19,20 +20,19 @@ def overlap_fraction(start_hour: int, duration_min: int, hour: int) -> float:
     return overlap / 60.0
 
 
-def candidate_hours(task: pd.Series) -> range:
-    arrival = int(task["ArrivalHour"])
-    if task["TaskType"] == "RealTimeInference":
+def candidate_hours(task_type: str, arrival: int, latest_finish: int, duration_min: float) -> range:
+    if task_type == "RealTimeInference":
         return range(arrival, arrival + 1)
-    latest = min(int(task["LatestFinishHour"]), EXECUTION_END)
-    last_start = math.floor(latest - float(task["EstimatedDuration_min"]) / 60.0 + 1e-9)
+    latest = min(int(latest_finish), EXECUTION_END)
+    last_start = math.floor(latest - float(duration_min) / 60.0 + 1e-9)
     return range(arrival, last_start + 1)
 
 
-def candidate_profile(task: pd.Series, start: int) -> tuple[np.ndarray, np.ndarray]:
+def candidate_profile(duration_min: int, start: int) -> tuple[np.ndarray, np.ndarray]:
     hours, fracs = [], []
-    last = min(math.ceil(start + task["EstimatedDuration_min"] / 60.0), EXECUTION_END)
+    last = min(math.ceil(start + duration_min / 60.0), EXECUTION_END)
     for hour in range(max(start, 0), last):
-        q = overlap_fraction(start, int(task["EstimatedDuration_min"]), hour)
+        q = overlap_fraction(start, duration_min, hour)
         if q > 0:
             hours.append(hour)
             fracs.append(q)
@@ -40,19 +40,21 @@ def candidate_profile(task: pd.Series, start: int) -> tuple[np.ndarray, np.ndarr
 
 
 def feasible(
-    task: pd.Series,
+    gpu_demand: float,
+    power_per_gpu: float,
     r: int,
     start: int,
+    duration_min: int,
     gpu_use: np.ndarray,
     ai_power: np.ndarray,
     data: Q4Data,
     tol: float = 1e-7,
 ) -> bool:
-    idx, q = candidate_profile(task, start)
+    idx, q = candidate_profile(duration_min, start)
     if len(idx) == 0:
         return False
-    g_inc = float(task["GPU_Demand"]) * q
-    p_inc = float(task["GPU_Demand"] * task["PowerPerGPU"]) * q
+    g_inc = gpu_demand * q
+    p_inc = gpu_demand * power_per_gpu * q
     if np.any(gpu_use[r, idx] + g_inc > data.gpu_cap[r] + tol):
         return False
     total_it = data.non_ai[r, idx] + ai_power[r, idx] + p_inc
@@ -63,42 +65,61 @@ def feasible(
     return True
 
 
-def place(task: pd.Series, r: int, start: int, gpu_use: np.ndarray, ai_power: np.ndarray) -> None:
-    idx, q = candidate_profile(task, start)
-    gpu_use[r, idx] += float(task["GPU_Demand"]) * q
-    ai_power[r, idx] += float(task["GPU_Demand"] * task["PowerPerGPU"]) * q
+def place(
+    gpu_demand: float,
+    power_per_gpu: float,
+    r: int,
+    start: int,
+    duration_min: int,
+    gpu_use: np.ndarray,
+    ai_power: np.ndarray,
+) -> None:
+    idx, q = candidate_profile(duration_min, start)
+    gpu_use[r, idx] += gpu_demand * q
+    ai_power[r, idx] += gpu_demand * power_per_gpu * q
+
+
+def sample_starts(starts: list[int], max_delay_scan: int | None, realtime: bool) -> list[int]:
+    if realtime or max_delay_scan is None or len(starts) <= max_delay_scan:
+        return starts
+    head = starts[: max(16, max_delay_scan // 2)]
+    step = max(1, len(starts) // max_delay_scan)
+    sampled = starts[::step][:max_delay_scan]
+    return sorted(set(head) | set(sampled))
 
 
 def score_candidate(
-    task: pd.Series,
+    *,
+    strategy: Strategy,
+    source: str,
     region: str,
     start: int,
+    arrival: int,
+    duration_min: int,
+    gpu_demand: float,
+    power_per_gpu: float,
+    max_latency: float,
     data: Q4Data,
-    strategy: Strategy,
     gpu_use: np.ndarray,
-    ai_power: np.ndarray,
 ) -> float:
-    r = REGIONS.index(region)
-    idx, q = candidate_profile(task, start)
-    p_inc = float(task["GPU_Demand"] * task["PowerPerGPU"]) * q
-    facility = p_inc * data.pue[r]
-    # Proxy: treat incremental facility load as grid-facing energy for cost/carbon ranking.
+    r = REGION_INDEX[region]
+    idx, q = candidate_profile(duration_min, start)
+    facility = gpu_demand * power_per_gpu * q * data.pue[r]
     energy_cost = float(np.dot(facility, data.price[r, idx]))
     carbon_cost = float(np.dot(facility, data.carbon[r, idx]))
-    wait = float(start - task["ArrivalHour"])
-    latency = data.latency_map[(task["SourceRegion"], region)]
-    migration = float(region != task["SourceRegion"])
-    peak_after = float(np.max((gpu_use[r, idx] + float(task["GPU_Demand"]) * q) / data.gpu_cap[r]))
+    wait = float(start - arrival)
+    latency = data.latency_map[(source, region)]
+    migration = float(region != source)
+    peak_after = float(np.max((gpu_use[r, idx] + gpu_demand * q) / data.gpu_cap[r]))
 
     if strategy == "local_first":
-        return 10.0 * migration + 0.8 * wait + 0.1 * latency / max(task["MaxLatency_ms"], 1) + 0.1 * peak_after
+        return 10.0 * migration + 0.8 * wait + 0.1 * latency / max(max_latency, 1) + 0.1 * peak_after
     if strategy == "lowest_price":
         return energy_cost + 1e-3 * wait + 1e-4 * latency
     if strategy == "lowest_carbon":
         return 1e3 * carbon_cost + 1e-3 * wait + 1e-4 * latency
-    # joint: normalized mix of cost, carbon, wait, latency, migration, peak
     return (
-        1.0 * energy_cost / 1000.0
+        energy_cost / 1000.0
         + 80.0 * carbon_cost
         + 15.0 * wait
         + 0.05 * latency
@@ -111,13 +132,12 @@ def schedule_tasks(
     data: Q4Data,
     strategy: Strategy = "joint",
     task_subset: pd.DataFrame | None = None,
-    max_delay_scan: int | None = 72,
+    max_delay_scan: int | None = 48,
 ) -> tuple[pd.DataFrame, np.ndarray, np.ndarray]:
     """
-    Phase-1 dynamic greedy scheduling over the full (or subset) task set.
+    Phase-1 dynamic greedy scheduling.
 
-    max_delay_scan: for flexible tasks, only evaluate the first K feasible start
-    hours plus a few price/carbon-attractive offsets, to keep 50k-scale tractable.
+    max_delay_scan limits flexible-task start enumeration for tractability.
     """
     tasks = data.tasks if task_subset is None else task_subset.copy()
     if "PowerPerGPU" not in tasks.columns:
@@ -139,56 +159,88 @@ def schedule_tasks(
 
     assignments = []
     n_tasks = len(work)
-    for i, (_, task) in enumerate(work.iterrows(), start=1):
+    for i, row in enumerate(work.itertuples(index=False), start=1):
         if i == 1 or i % 5000 == 0 or i == n_tasks:
             print(f"  [{strategy}] scheduling {i}/{n_tasks}", flush=True)
-        starts = list(candidate_hours(task))
-        if task["TaskType"] != "RealTimeInference" and max_delay_scan is not None and len(starts) > max_delay_scan:
-            # Keep early window + sparse later samples for valley chasing.
-            head = starts[: max(24, max_delay_scan // 2)]
-            step = max(1, len(starts) // max_delay_scan)
-            sampled = starts[::step][:max_delay_scan]
-            starts = sorted(set(head) | set(sampled))
+
+        task_id = int(row.TaskID)
+        task_type = row.TaskType
+        source = row.SourceRegion
+        arrival = int(row.ArrivalHour)
+        duration_min = int(row.EstimatedDuration_min)
+        gpu_demand = float(row.GPU_Demand)
+        power_per_gpu = float(row.PowerPerGPU)
+        max_latency = float(row.MaxLatency_ms)
+        latest_finish = float(row.LatestFinishHour)
+        realtime = task_type == "RealTimeInference"
+
+        starts = sample_starts(
+            list(candidate_hours(task_type, arrival, int(latest_finish), duration_min)),
+            max_delay_scan,
+            realtime,
+        )
+        regions = data.eligible[task_id]
+        # local_first: try source region earliest first
+        if strategy == "local_first" and source in regions:
+            regions = [source] + [r for r in regions if r != source]
 
         best = None
         for start in starts:
-            finish = start + task["EstimatedDuration_min"] / 60.0
-            if finish > min(task["LatestFinishHour"], EXECUTION_END) + 1e-9:
+            finish = start + duration_min / 60.0
+            if finish > min(latest_finish, EXECUTION_END) + 1e-9:
                 continue
-            for region in data.eligible[int(task["TaskID"])]:
-                r = REGIONS.index(region)
-                if not feasible(task, r, start, gpu_use, ai_power, data):
+            for region in regions:
+                r = REGION_INDEX[region]
+                if not feasible(gpu_demand, power_per_gpu, r, start, duration_min, gpu_use, ai_power, data):
                     continue
-                cost = score_candidate(task, region, start, data, strategy, gpu_use, ai_power)
+                if strategy == "local_first":
+                    # earliest feasible with local preference already ordered
+                    best = (0.0, region, start)
+                    break
+                cost = score_candidate(
+                    strategy=strategy,
+                    source=source,
+                    region=region,
+                    start=start,
+                    arrival=arrival,
+                    duration_min=duration_min,
+                    gpu_demand=gpu_demand,
+                    power_per_gpu=power_per_gpu,
+                    max_latency=max_latency,
+                    data=data,
+                    gpu_use=gpu_use,
+                )
                 if best is None or cost < best[0]:
                     best = (cost, region, start)
+            if strategy == "local_first" and best is not None:
+                break
+
         if best is None:
-            raise RuntimeError(f"No feasible placement for TaskID={int(task['TaskID'])} under {strategy}")
+            raise RuntimeError(f"No feasible placement for TaskID={task_id} under {strategy}")
         _, region, start = best
-        place(task, REGIONS.index(region), start, gpu_use, ai_power)
-        latency = data.latency_map[(task["SourceRegion"], region)]
+        place(gpu_demand, power_per_gpu, REGION_INDEX[region], start, duration_min, gpu_use, ai_power)
+        latency = data.latency_map[(source, region)]
         assignments.append(
             {
-                "TaskID": int(task["TaskID"]),
-                "TaskType": task["TaskType"],
-                "SourceRegion": task["SourceRegion"],
+                "TaskID": task_id,
+                "TaskType": task_type,
+                "SourceRegion": source,
                 "ExecutionRegion": region,
-                "ArrivalHour": int(task["ArrivalHour"]),
+                "ArrivalHour": arrival,
                 "StartHour": int(start),
-                "FinishHour": float(start + task["EstimatedDuration_min"] / 60.0),
-                "WaitHour": float(start - task["ArrivalHour"]),
-                "GPU_Demand": float(task["GPU_Demand"]),
-                "EstimatedDuration_min": float(task["EstimatedDuration_min"]),
-                "PowerPerGPU": float(task["PowerPerGPU"]),
+                "FinishHour": float(start + duration_min / 60.0),
+                "WaitHour": float(start - arrival),
+                "GPU_Demand": gpu_demand,
+                "EstimatedDuration_min": float(duration_min),
+                "PowerPerGPU": power_per_gpu,
                 "NetworkLatency_ms": float(latency),
-                "MaxLatency_ms": float(task["MaxLatency_ms"]),
-                "LatestFinishHour": float(task["LatestFinishHour"]),
-                "Migrated": bool(region != task["SourceRegion"]),
+                "MaxLatency_ms": max_latency,
+                "LatestFinishHour": latest_finish,
+                "Migrated": bool(region != source),
             }
         )
 
     schedule = pd.DataFrame(assignments)
-    # Extend AI power array to POWER_HOURS with zeros at 2406 for power stage.
     ai_full = np.zeros((len(REGIONS), EXECUTION_END + 1), dtype=float)
     ai_full[:, :EXECUTION_END] = ai_power
     return schedule, gpu_use, ai_full

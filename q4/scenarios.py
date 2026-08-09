@@ -22,6 +22,7 @@ def run_pipeline(
     base_schedule: pd.DataFrame | None = None,
     base_ai: np.ndarray | None = None,
     out_tables=None,
+    max_delay_scan: int | None = 24,
 ) -> dict:
     """
     Two-stage Q4 solve:
@@ -29,7 +30,9 @@ def run_pipeline(
       2) storage-power LP with optional carbon/peak/RE constraints
     """
     if reschedule or base_schedule is None or base_ai is None:
-        schedule, gpu_use, ai_power = schedule_tasks(data, strategy=strategy, task_subset=task_subset)
+        schedule, gpu_use, ai_power = schedule_tasks(
+            data, strategy=strategy, task_subset=task_subset, max_delay_scan=max_delay_scan
+        )
     else:
         schedule, gpu_use, ai_power = base_schedule, None, base_ai
 
