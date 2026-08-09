@@ -76,7 +76,7 @@ def main() -> None:
     rec = preferred.iloc[0].to_dict()
     recommendation = {
         "preferred_scenario": rec["scenario"],
-        "selection_rule": "joint two-stage co-optimization minimizing operating cost under physical constraints; scenarios compare carbon budgets, price mechanisms, and renewable volatility",
+        "selection_rule": "joint two-stage co-optimization minimizing operating cost under physical constraints; carbon scenarios use hard ε-constraints (infeasible if below NonAI floor)",
         "operating_cost_CNY": float(rec["operating_cost_CNY"]),
         "carbon_tCO2": float(rec["carbon_tCO2"]),
         "renewable_utilization": float(rec["renewable_utilization"]),
@@ -114,11 +114,11 @@ def main() -> None:
         "scenario",
         "operating_cost_CNY",
         "carbon_tCO2",
+        "carbon_budget_tCO2",
+        "carbon_feasible",
         "renewable_utilization",
-        "renewable_utilization_of_deliverable",
         "peak_net_import_sum_MW",
         "mean_wait_hour",
-        "mean_network_latency_ms",
         "hard_pass",
     ]
     md.append(summary[show_cols].to_markdown(index=False))

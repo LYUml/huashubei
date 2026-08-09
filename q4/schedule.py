@@ -101,6 +101,7 @@ def score_candidate(
     max_latency: float,
     data: Q4Data,
     gpu_use: np.ndarray,
+    carbon_weight: float | None = None,
 ) -> float:
     r = REGION_INDEX[region]
     idx, q = candidate_profile(duration_min, start)
@@ -117,10 +118,13 @@ def score_candidate(
     if strategy == "lowest_price":
         return energy_cost + 1e-3 * wait + 1e-4 * latency
     if strategy == "lowest_carbon":
-        return 1e3 * carbon_cost + 1e-3 * wait + 1e-4 * latency
+        cw = 1e3 if carbon_weight is None else float(carbon_weight)
+        return cw * carbon_cost + 1e-3 * wait + 1e-4 * latency
+    # joint (default) or carbon-weight override used by ε-constraint search
+    cw = 80.0 if carbon_weight is None else float(carbon_weight)
     return (
         energy_cost / 1000.0
-        + 80.0 * carbon_cost
+        + cw * carbon_cost
         + 15.0 * wait
         + 0.05 * latency
         + 8.0 * migration
@@ -133,11 +137,13 @@ def schedule_tasks(
     strategy: Strategy = "joint",
     task_subset: pd.DataFrame | None = None,
     max_delay_scan: int | None = 48,
+    carbon_weight: float | None = None,
 ) -> tuple[pd.DataFrame, np.ndarray, np.ndarray]:
     """
     Phase-1 dynamic greedy scheduling.
 
     max_delay_scan limits flexible-task start enumeration for tractability.
+    carbon_weight overrides the joint/lowest_carbon carbon coefficient when set.
     """
     tasks = data.tasks if task_subset is None else task_subset.copy()
     if "PowerPerGPU" not in tasks.columns:
@@ -161,7 +167,8 @@ def schedule_tasks(
     n_tasks = len(work)
     for i, row in enumerate(work.itertuples(index=False), start=1):
         if i == 1 or i % 5000 == 0 or i == n_tasks:
-            print(f"  [{strategy}] scheduling {i}/{n_tasks}", flush=True)
+            tag = strategy if carbon_weight is None else f"{strategy}/cw={carbon_weight:g}"
+            print(f"  [{tag}] scheduling {i}/{n_tasks}", flush=True)
 
         task_id = int(row.TaskID)
         task_type = row.TaskType
@@ -209,6 +216,7 @@ def schedule_tasks(
                     max_latency=max_latency,
                     data=data,
                     gpu_use=gpu_use,
+                    carbon_weight=carbon_weight,
                 )
                 if best is None or cost < best[0]:
                     best = (cost, region, start)

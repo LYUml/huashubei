@@ -25,22 +25,25 @@ def schedule_qos_metrics(schedule: pd.DataFrame) -> dict:
 
 
 def aggregate_power_metrics(region_results: list[dict], schedule_metrics: dict) -> dict:
-    cost = sum(r["cost"] for r in region_results)
-    carbon = sum(r["carbon"] for r in region_results)
+    cost = sum(float(r["cost"]) for r in region_results if np.isfinite(r["cost"]))
+    carbon = sum(float(r["carbon"]) for r in region_results if np.isfinite(r["carbon"]))
     # Absorbed RE = operational available − LP curtailment
     # (attachment: utilized = AvailableRE − Curtailment).
-    absorbed = sum(float((r["available_re"] - r["curtailment"]).sum()) for r in region_results)
+    absorbed = sum(float((r["available_re"] - r["curtailment"]).sum()) for r in region_results if np.isfinite(r["curtailment"]).all())
     deliverable = sum(float(r["available_re"].sum()) for r in region_results)
     raw = sum(float(r.get("available_re_raw", r["available_re"]).sum()) for r in region_results)
     # Headline utilization vs attachment AvailableRenewable (not the LP ceiling).
-    # Using the deliverable ceiling as denominator yields ~100% by construction and
-    # is misleading; keep it only as an operational fill-rate diagnostic.
     util_raw = absorbed / raw if raw > 1e-9 else 0.0
     util_deliv = absorbed / deliverable if deliverable > 1e-9 else 0.0
-    peaks = {r["region"]: float(r["peak_net_import"]) for r in region_results}
-    peak_sum = float(sum(peaks.values()))
+    peaks = {
+        r["region"]: float(r["peak_net_import"])
+        for r in region_results
+        if np.isfinite(r["peak_net_import"])
+    }
+    peak_sum = float(sum(peaks.values())) if peaks else float("nan")
     # QoS loss: mean wait + migration penalty (smaller better). Realtime must stay perfect.
     q_loss = float(schedule_metrics["mean_wait_hour"]) + 0.5 * float(schedule_metrics["migration_rate"])
+    meta = region_results[0].get("_meta") or {}
     return {
         "n_tasks": schedule_metrics["n_tasks"],
         "operating_cost_CNY": cost,
@@ -60,6 +63,10 @@ def aggregate_power_metrics(region_results: list[dict], schedule_metrics: dict) 
         "peak_net_import_by_region_MW": peaks,
         "deadline_violation": schedule_metrics["deadline_violation"],
         "latency_violation": schedule_metrics["latency_violation"],
+        "carbon_budget_tCO2": meta.get("carbon_budget_total"),
+        "carbon_min_given_schedule_tCO2": meta.get("carbon_min_given_schedule"),
+        "carbon_feasible": meta.get("carbon_feasible", True),
+        "carbon_infeasible_reason": meta.get("carbon_infeasible_reason"),
     }
 
 
