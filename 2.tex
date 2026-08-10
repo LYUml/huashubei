@@ -762,24 +762,32 @@ Dynamic-Greedy       & 0.065 & 5  & 1.5\%  & 93.2\%  & 37.3\% & --- \\
 \end{tabular}
 \end{table}
 
-主推方案的排程甘特图见图~\ref{fig:gantt}，灰色为 $2400$--$2406$ 收尾段；含 carry-in 的六区域逐时
+主推方案的排程甘特图见图~\ref{fig:gantt-abc} 与图~\ref{fig:gantt-def}，灰色为 $2400$--$2406$ 收尾段；含 carry-in 的六区域逐时
 GPU 利用率见图~\ref{fig:util}，负载在区域与时间上分布均衡且无越限。
 
 \begin{figure}[H]
 \centering
-\begin{subfigure}[c]{0.52\textwidth}
+\begin{subfigure}[c]{0.48\textwidth}
 \centering
-\includegraphics[width=\linewidth]{06_schedule_gantt.png}
-\caption{主推方案调度甘特图（灰为收尾段）}
-\label{fig:gantt}
+\includegraphics[width=\linewidth]{06_schedule_gantt_left.png}
+\caption{RegionA--C 调度甘特图}
+\label{fig:gantt-abc}
 \end{subfigure}\hfill
-\begin{subfigure}[c]{0.46\textwidth}
+\begin{subfigure}[c]{0.48\textwidth}
 \centering
-\includegraphics[width=\linewidth]{07_gpu_utilization.png}
-\caption{六区域逐时 GPU 利用率}
-\label{fig:util}
+\includegraphics[width=\linewidth]{06_schedule_gantt_right.png}
+\caption{RegionD--F 调度甘特图}
+\label{fig:gantt-def}
 \end{subfigure}
-\caption{问题一：调度结果与利用率}
+\caption{问题一：主推方案最终 $24$ 小时任务调度甘特图（灰色为收尾段）}
+\label{fig:gantt}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.82\textwidth]{07_gpu_utilization.png}
+\caption{问题一：六区域逐时 GPU 利用率热力图（含 carry-in）}
+\label{fig:util}
 \end{figure}
 
 服务与削峰之间的权衡由 $\varepsilon$-约束前沿刻画（表~\ref{tab:pareto} 与图~\ref{fig:pareto}）：

@@ -705,21 +705,54 @@ def validate_schedule(
 
 def plot_schedule(schedule: pd.DataFrame, gpu_use: np.ndarray, data: DataBundle):
     colors = {"AITraining": "tab:blue", "BatchInference": "tab:orange", "RealTimeInference": "tab:green"}
-    fig, axes = plt.subplots(6, 1, figsize=(14, 15), sharex=True)
-    for ax, region in zip(axes, REGIONS):
-        subset = schedule[schedule["ExecutionRegion"] == region].sort_values("StartHour")
-        y = 0
-        for _, row in subset.iterrows():
-            ax.barh(y, row["FinishHour"] - row["StartHour"], left=row["StartHour"],
-                    color=colors[row["TaskType"]], alpha=0.78, height=0.8)
-            y += 1
-        ax.axvspan(2400, 2406, color="grey", alpha=0.15)
-        ax.set_ylabel(region); ax.set_yticks([])
-    axes[0].set_title("Final 24-hour task schedule (grey: closure horizon)")
-    axes[-1].set_xlabel("Hour")
     handles = [plt.Rectangle((0, 0), 1, 1, color=c) for c in colors.values()]
-    axes[0].legend(handles, colors.keys(), loc="upper right", ncol=3)
-    plt.tight_layout(); plt.savefig(FIG_DIR / "06_schedule_gantt.png", dpi=180); plt.close()
+
+    def _draw_region_panel(ax, region: str, show_xlabel: bool = False):
+        subset = schedule[schedule["ExecutionRegion"] == region].sort_values("StartHour")
+        for y, (_, row) in enumerate(subset.iterrows()):
+            ax.barh(
+                y,
+                row["FinishHour"] - row["StartHour"],
+                left=row["StartHour"],
+                color=colors[row["TaskType"]],
+                alpha=0.78,
+                height=0.8,
+            )
+        ax.axvspan(2400, 2406, color="grey", alpha=0.15)
+        ax.set_ylabel(region)
+        ax.set_yticks([])
+        ax.set_xlim(SCHEDULE_START, EXECUTION_END)
+        if show_xlabel:
+            ax.set_xlabel("Hour")
+
+    # Two side-by-side panels: RegionA–C | RegionD–F (saves vertical space in paper).
+    left_regions = REGIONS[:3]
+    right_regions = REGIONS[3:]
+    fig, axes = plt.subplots(3, 2, figsize=(14, 8.2), sharex="col")
+    for row, (left_r, right_r) in enumerate(zip(left_regions, right_regions)):
+        _draw_region_panel(axes[row, 0], left_r, show_xlabel=(row == 2))
+        _draw_region_panel(axes[row, 1], right_r, show_xlabel=(row == 2))
+    axes[0, 0].set_title("Regions A–C")
+    axes[0, 1].set_title("Regions D–F")
+    fig.suptitle("Final 24-hour task schedule (grey: closure horizon)", y=0.995)
+    axes[0, 1].legend(handles, list(colors.keys()), loc="upper right", ncol=3, fontsize=8)
+    plt.tight_layout(rect=[0, 0, 1, 0.97])
+    plt.savefig(FIG_DIR / "06_schedule_gantt.png", dpi=180)
+    plt.close()
+
+    # Also export separate panels for explicit LaTeX side-by-side subfigures.
+    for fname, regions, title in [
+        ("06_schedule_gantt_left.png", left_regions, "Regions A–C"),
+        ("06_schedule_gantt_right.png", right_regions, "Regions D–F"),
+    ]:
+        fig, axes = plt.subplots(3, 1, figsize=(7.2, 8.0), sharex=True)
+        for ax, region in zip(axes, regions):
+            _draw_region_panel(ax, region, show_xlabel=(region == regions[-1]))
+        axes[0].set_title(f"{title} (grey: closure horizon)")
+        axes[0].legend(handles, list(colors.keys()), loc="upper right", ncol=3, fontsize=8)
+        plt.tight_layout()
+        plt.savefig(FIG_DIR / fname, dpi=180)
+        plt.close()
 
     info = data.gpu_info.set_index("Region")
     gpu_cap = info.loc[REGIONS, "Available_GPU"].to_numpy(float)[:, None]
