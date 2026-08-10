@@ -26,9 +26,9 @@
 \usepackage{booktabs}
 \usepackage{siunitx}
 \usepackage{hyperref}
-\usepackage{indentfirst}      
-\setlength{\parindent}{2em}    
-\setlength{\parskip}{0pt}  
+\usepackage{indentfirst}
+\setlength{\parskip}{0pt}
+\AtBeginDocument{\setlength{\parindent}{2\ccwd}}
 \hypersetup{
     colorlinks=true,
     linkcolor=blue,
@@ -44,7 +44,6 @@
 }
 
 \pagestyle{empty}
-\setlength{\parindent}{2em}
 \setlength{\parskip}{0pt}
 \renewcommand{\arraystretch}{1}
 
