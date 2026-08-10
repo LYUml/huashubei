@@ -26,8 +26,11 @@ scikit-learn       # 归一化（MinMaxScaler）
 plotly             # 桑基图（可选）
 ```
 
+## 数据路径
+
+`q2_data_prep.py` 按顺序查找：`q2/附件数据/` → 仓库根 `data/` → `task_c/附件数据/`。
+
 ## 注意事项（评审待修 P0）
 
-- 数据接口当前为 `/data/workspace/data`（Linux 容器路径），本地运行需改为官方附件路径
 - 成本/碳排放目标未扣除新能源消纳（应为 `(Load−RenewUsed)×Price`），见评审结论
 - 设施功率约束缺失、IT 功率未含 NonAI 负荷、约束为软罚函数（n_constr=0）
