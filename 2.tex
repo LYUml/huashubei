@@ -1,0 +1,1680 @@
+% !TeX program = xelatex
+
+\documentclass[UTF8,a4paper,zihao=-4]{ctexart}
+
+\usepackage{geometry}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{xcolor}
+\usepackage{setspace}
+\usepackage{tikz}
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{float}
+\usepackage{placeins}
+\usepackage{booktabs}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{algorithmicx}
+\usepackage{amssymb}
+\usepackage{tabularx}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{subcaption}
+\usepackage{url}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{hyperref}
+\usepackage{indentfirst}      
+\setlength{\parindent}{2em}    
+\setlength{\parskip}{0pt}  
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue
+}
+
+\geometry{
+    left=2.5cm,
+    right=2.5cm,
+    top=2.5cm,
+    bottom=2.5cm
+}
+
+\pagestyle{empty}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0pt}
+\renewcommand{\arraystretch}{1}
+
+% 如果原来的字体报错，可以先用这一组测试
+\setmainfont{TeX Gyre Termes}
+\setCJKmainfont{FandolSong-Regular}
+\setCJKsansfont{FandolHei-Regular}
+\setCJKmonofont{FandolFang-Regular}
+
+\newcommand{\songfourteen}{%
+    \CJKfontspec{FandolSong-Regular}%
+    \fontsize{14pt}{16.8pt}\selectfont
+}
+
+\newcommand{\songtenhalf}{%
+    \CJKfontspec{FandolSong-Regular}%
+    \fontsize{10.5pt}{12.6pt}\selectfont
+}
+
+\newcommand{\heitififteen}{%
+    \CJKfontspec{FandolHei-Regular}%
+    \fontsize{15pt}{18pt}\selectfont
+}
+
+\newcommand{\songxiaosi}{%
+    \CJKfontspec{FandolSong-Regular}%
+    \fontsize{12pt}{12pt}\selectfont
+}
+
+\newcommand{\fronttable}{%
+    \noindent
+    \begin{tikzpicture}[x=1cm,y=1cm]
+
+        \def\colA{3.05}
+        \def\colB{10.16}
+        \def\colC{2.78}
+        \def\rowA{0.57}
+        \def\rowB{1.66}
+        \def\totalW{15.99}
+        \def\totalH{2.23}
+
+        \draw[line width=0.55pt]
+            (0,0) rectangle (\totalW,-\totalH);
+
+        \draw[line width=0.55pt]
+            (\colA,0) -- (\colA,-\totalH);
+
+        \draw[line width=0.55pt]
+            ({\colA+\colB},0)
+            -- ({\colA+\colB},-\totalH);
+
+        \draw[line width=0.55pt]
+            (0,-\rowA) -- (\colA,-\rowA);
+
+        \draw[line width=0.55pt]
+            ({\colA+\colB},-\rowA)
+            -- (\totalW,-\rowA);
+
+        \node[font=\songtenhalf]
+            at ({\colA/2},{-\rowA/2})
+            {所属类别};
+
+        \node[font=\songtenhalf]
+            at ({\colA+\colB+\colC/2},{-\rowA/2})
+            {参赛编号};
+
+        \node[font=\zihao{-4}]
+            at ({\colA/2},{-\rowA-\rowB/2})
+            {本科组};
+
+        \node[
+            font=\bfseries\songfourteen,
+            align=center,
+            anchor=center
+        ]
+            at ({\colA+\colB/2},{-\totalH/2})
+            {2026年“华数杯”大学生数学建模竞赛};
+
+
+        \node[
+            font=\bfseries\zihao{-4},
+            align=center
+        ]
+            at ({\colA+\colB+\colC/2},{-\rowA-\rowB/2})
+            {CM2605115};
+
+    \end{tikzpicture}%
+}
+
+\begin{document}
+
+\vspace*{-0.50cm}%
+\fronttable
+
+\vspace{0.50cm}
+{\centering\bfseries\heitififteen {多区域智算中心算力调度与储电协同优化}\par}
+
+\vspace{0.29cm}
+{\centering\heiti\zihao{4} 摘要\par}
+\vspace{0.16cm}
+
+人工智能规模化应用使智算中心算力负荷与电力消耗快速上升，多区域部署需同时兼顾时延、电价、碳排放、新能源出力与储能调节。本文基于六区域任务轨迹、算力参数、时延矩阵及逐时电价、碳强度、新能源储能数据，围绕 GPU 需求预测、基础/碳感知调度、储能运行与算电联合优化建立模型，在服务质量与低碳经济运行之间寻求可解释权衡。
+
+\textbf{针对问题一：}对六区域、三类任务的小时 GPU 需求做结构与自相关诊断，发现序列呈\textbf{强随机、弱周期特征}，据此建立\textbf{复合泊松短时预测模型}。滚动回测中该模型与历史均值并列最优，最终 $24$ 小时系统级 WAPE 为 $24.30\%$，$90\%$ 区间覆盖率 $93.75\%$。调度上对真实到达的 $538$ 个任务建立含 \textbf{carry-in 的硬约束模型}，以字典序依次最小化等待与峰值利用率；主推方案\textbf{平均等待 $0$}、峰值利用率 $56.5\%$（MIP gap $0.53\%$），硬约束全部满足。
+
+\textbf{针对问题四：}构建算力—储能—电力\textbf{两阶段协同框架}：阶段一以\textbf{碳电价感知贪心确定任务}落点，阶段二在负荷固定后求解\textbf{区域储电 LP }最小化运行成本，并以 $\varepsilon$-约束与情景分析处理碳排、峰值与新能源目标。联合策略基线成本 $1.632\times 10^9$\,CNY、碳排 $1.612\times 10^6$\,tCO$_2$、平均等待 $0.27$\,h、时延 $25.9$\,ms，新能源利用率约 $32.9\%$。碳间隙、峰谷/平价/碳电联动及新能源丰度情景表明：\textbf{可行碳约束下成本随排放收紧而上升}；电价机制主要改形\textbf{成本—碳与峰值形态}；新能源偏紧/偏松则\textbf{显著抬升或降低成本与排放。}
+
+\noindent \textbf{关键词：}复合泊松预测；字典序调度；碳感知任务调度；储能优化；算电协同
+\newpage
+\tableofcontents
+\newpage
+\zihao{-4}
+
+\section{问题重述}
+
+\subsection{问题背景}
+
+随着人工智能应用规模持续扩大，数据中心的算力需求和能源消耗快速增长，电力成本、碳排放及其对电网运行的影响日益突出。传统的数据中心调度主要关注计算资源利用率和任务完成效率，而算电协同进一步考虑算力负荷与电力系统之间的实时耦合，要求在保证计算任务服务质量的同时，协调电价、碳强度、新能源出力和储能状态，实现计算资源与能源资源的协同配置。
+
+不同区域在用户距离、算力容量和能源条件等方面具有明显差异。东部区域靠近用户，能够为时延敏感任务提供较好的服务质量，但面临较高的计算负荷和能源压力；西部算力中心及新能源富集区域具备较大的算力承载能力和低碳用能优势，却可能因跨区域迁移增加网络时延。同时，实时推理、批量推理和AI训练任务具有不同的时延敏感性与调度弹性，而新能源出力的波动性又需要储能进行跨时段调节。因此，如何在任务服务质量、运行成本、碳排放、新能源利用率和电网交互压力之间实现合理权衡，是本题需要解决的核心问题。
+
+\subsection{系统描述与问题边界}
+
+本题构建了由六个区域组成的多区域算电协同系统。其中，RegionA、RegionB和RegionC为靠近用户侧的东部高负荷区域，RegionD为具有较大算力容量的西部算力中心，RegionE和RegionF分别代表光伏资源和风电资源富集区域。各区域配置不同规模的GPU资源、IT功率容量、能源使用效率和储能设备，并通过广域网络实现计算任务的跨区域调度。
+
+系统中的AI任务分为实时推理、批量推理和AI训练三类。实时推理任务具有较强的时延约束，需要在到达后立即执行；批量推理和AI训练任务具有一定的延迟调度空间，可根据算力容量和逐时能源条件选择执行区域与开工时刻。所有任务均不可抢占、不可拆分，且任务一旦开始执行便不能中途迁移。
+
+任务到达的主时域为第$0$--$2399$小时，第$2400$--$2405$小时不再产生新任务，仅用于结清主时域内到达但尚未完成的任务；第$2406$小时不安排任务执行，仅用于电力与储能终端状态结算。因此，所有任务必须在时点$2406$前完成，不得占用第$2406$小时。
+
+各问题对任务负荷的使用方式有所区别。问题一中的第$2376$--$2399$小时预测结果仅用于评价预测精度，该时段的最终调度仍以真实到达任务为输入；问题二和问题四根据实际任务调度结果重新计算AI IT负荷；问题三则固定附件给出的基准AI IT负荷和非AI IT负荷，只优化储能充放电、购售电及新能源分配。问题四不进一步考虑跨区域线路潮流、网络带宽、任务迁移数据量、传输能耗及传输费用。
+
+\subsection{问题要求}
+
+\begin{enumerate}[
+    label=\textbf{问题\arabic*：},
+    leftmargin=5.5em,
+    labelsep=0.5em,
+    itemsep=0.45em
+]
+    \item 基于历史AI工作负载数据，统计不同区域、不同任务类型的GPU需求特征，并建立短期需求预测模型。在此基础上，以第$2376$--$2399$小时实际到达的任务为输入，确定任务的执行区域与开工时刻，在满足GPU容量、功率容量、网络时延和完成期限等约束的条件下构建基础算力调度方案，并展示任务调度甘特图及各区域GPU利用率。
+
+    \item 以第$0$--$2399$小时实际到达的任务和逐时电力参数为输入，将任务迁移区域和开工时刻作为主要决策，在满足计算资源与服务质量约束的基础上，综合考虑区域电价、碳强度和可用新能源出力，建立碳感知任务调度模型，分析运行成本、碳排放、网络时延和新能源利用率之间的权衡关系。
+
+    \item 在任务调度与逐时IT负荷已经给定的条件下，建立储能协同优化模型，确定各区域逐时充放电、购售电及新能源分配策略，并通过与基准运行状态比较，评价储能系统对运行成本、碳排放、区域峰值净购电功率和负荷波动程度的影响。
+
+    \item 综合前三问的计算负荷建模、任务调度和储能优化方法，建立多区域算力、储能与电力联合优化模型，统一考虑任务异构性、区域算力容量、网络时延、电价、碳强度、新能源、储能及购售电边界，在系统成本、碳排放、网络时延、服务质量、新能源利用率和峰值净购电之间进行权衡，并比较不同碳约束、电价机制和新能源波动情景下调度策略的变化。
+\end{enumerate}
+
+为便于理解六区之间的协同关系，图~\ref{fig:q4-concept} 给出多区域算电协同的直观示意：计算任务可在时延允许范围内跨区迁移，各区域则通过向电网购电或售电平衡本地负荷与新能源出力。
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.50\textwidth]{figures/fig_q4_concept_regions_flow.png}
+  \caption{多区域算电协同示意图}
+  \label{fig:q4-concept}
+\end{figure}
+
+\section{模型假设}
+
+\section{数据总览和预处理}
+\label{sec:data-overview}
+
+\subsection{数据来源与关联结构}
+
+本题附件包含任务轨迹、区域算力参数、网络时延、任务功率映射、区域逐时运行数据和储能参数六类数据。各数据表分别具有任务级、区域级和区域--小时级三种粒度，并通过任务类型、区域编号和时段编号相互关联。各数据表的结构及建模用途见表~\ref{tab:global-data-overview}。
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\caption{附件数据的结构与主要用途}
+\label{tab:global-data-overview}
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.28}
+
+\begin{tabularx}{\textwidth}{@{}
+    >{\raggedright\arraybackslash}p{3.45cm}
+    >{\raggedright\arraybackslash}p{2.30cm}
+    >{\raggedright\arraybackslash}p{3.05cm}
+    >{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{数据文件}
+& \textbf{数据规模与粒度}
+& \textbf{主要关联字段}
+& \textbf{主要建模用途} \\
+\midrule
+
+{\scriptsize\nolinkurl{workload_trace.xlsx}}
+& $50\,000$条任务
+& \texttt{TaskID}、\texttt{TaskType}、\texttt{SourceRegion}
+& 提供任务到达时刻、GPU需求、执行时长、来源区域、时延阈值及完成期限 \\
+\addlinespace[2pt]
+
+{\scriptsize\nolinkurl{GPU_information.xlsx}}
+& $6$个区域
+& \texttt{Region}
+& 提供可调度GPU容量、IT功率上限、PUE及设施侧功率上限 \\
+\addlinespace[2pt]
+
+{\scriptsize\nolinkurl{network_latency.xlsx}}
+& $36$个区域对
+& \texttt{FromRegion}、\texttt{ToRegion}
+& 形成区域间网络时延矩阵，判断跨区域执行的时延可行性 \\
+\addlinespace[2pt]
+
+{\scriptsize\nolinkurl{power_mapping.xlsx}}
+& $3$类任务
+& \texttt{TaskType}
+& 将任务占用的等效GPU数量转换为AI IT功率 \\
+\addlinespace[2pt]
+
+{\scriptsize\nolinkurl{region_time_data.xlsx}}
+& $6\times2407$条区域--小时记录
+& \texttt{Region}、\texttt{Hour}
+& 提供逐时电价、售电价格、碳强度、可用新能源、非AI负荷及基准运行状态 \\
+\addlinespace[2pt]
+
+{\scriptsize\nolinkurl{storage_information.xlsx}}
+& $6$个区域
+& \texttt{Region}
+& 提供储能容量、SOC边界、初始SOC、充放电功率、效率及购售电边界 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+其中，任务表通过\texttt{TaskType}与功率映射表连接，通过任务来源区域和候选执行区域与网络时延表连接；区域算力参数和储能参数通过\texttt{Region}与调度结果连接；区域逐时数据则通过\texttt{Region}和\texttt{Hour}与聚合后的计算负荷连接。由此可形成任务级属性表、区域静态参数表和区域--小时参数表，为后续四个问题提供统一的数据基础。
+
+\subsection{数据完整性与一致性检验}
+
+首先对六个工作簿的主数据表进行完整性、唯一性和取值范围检查。任务数据共包含$50{,}000$条记录，任务编号均唯一，不存在完全重复记录和缺失单元格；任务到达时刻覆盖第$0$--$2399$小时，所有任务的最早开工时刻均等于到达时刻，执行方式均为不可抢占。三类任务与时延敏感等级一一对应，能够通过任务类型与功率映射表完整关联。
+
+区域逐时数据共包含$14{,}442=6\times2407$条记录，完整覆盖六个区域的第$0$--$2406$小时，不存在重复的“区域--小时”组合和缺失记录。网络时延数据完整覆盖$6\times6$个区域对；GPU参数表和储能参数表均包含六个区域，且区域编号与逐时数据保持一致。此外，各区域的可调度GPU容量与总GPU容量及预留比例相符，设施侧功率上限满足
+\[
+P_{r}^{\mathrm{facility,max}}
+=
+\mathrm{PUE}_{r}P_{r}^{\mathrm{IT,max}}.
+\]
+
+上述检查表明，原始数据不存在需要删除、插值或异常截断的缺失记录。为避免改变任务到达过程及逐时能源参数的真实波动特征，本文保留全部有效样本，仅进行时间对齐、跨表关联、字段角色划分和派生变量计算。后续多目标模型所需的量纲归一化仅作用于目标函数或评价指标，不改变原始物理量。
+
+\subsection{时间轴统一与样本划分}
+
+考虑到任务到达、任务执行和电力结算具有不同的时间边界，分别定义
+\[
+\mathcal{T}^{\mathrm{arr}}=\{0,1,\ldots,2399\},
+\]
+\[
+\mathcal{T}^{\mathrm{task}}=\{0,1,\ldots,2405\},
+\qquad
+\mathcal{T}^{\mathrm{power}}=\{0,1,\ldots,2406\}.
+\]
+其中，$\mathcal{T}^{\mathrm{arr}}$为任务到达时域，$\mathcal{T}^{\mathrm{task}}$为允许任务占用计算资源的时域，$\mathcal{T}^{\mathrm{power}}$为电力与储能结算时域。第$2400$--$2405$小时只允许执行主时域内遗留的弹性任务，第$2406$小时不允许任何任务占用GPU，仅用于计算终端购售电和储能状态。
+
+问题一的预测数据按照时间顺序划分。使用第$0$--$2351$小时数据训练候选模型，以第$2352$--$2375$小时数据进行验证和参数选择；模型确定后，使用第$0$--$2375$小时数据重新训练，并将第$2376$--$2399$小时作为最终测试集。该划分始终保持训练时刻早于验证和测试时刻，避免未来信息泄漏。预测精度评价完成后，第$2376$--$2399$小时的基础调度重新读取该时段真实到达的$538$个任务，不以预测需求替代实际任务。问题二至问题四同样统一使用附件中的真实任务和逐时电力参数。
+
+\subsection{任务属性与负荷转换}
+
+设任务$i$的来源区域为$o_i$，GPU需求为$g_i$，任务类型为$k_i$，最大允许网络时延为$L_i^{\max}$。由网络时延矩阵读取来源区域$o_i$到候选执行区域$r$的单向等效时延$\ell_{o_i r}$。对于需要满足网络时延阈值的任务，预先构造候选执行区域集合
+\[
+\mathcal{R}_i
+=
+\left\{
+r\in\mathcal{R}\mid
+\ell_{o_i r}\leq L_i^{\max}
+\right\},
+\]
+从而在后续调度中直接排除不满足服务质量要求的区域。
+
+根据功率映射表，将三类任务的单位等效GPU功率分别记为
+\[
+p_{\mathrm{AITraining}}=0.16,\qquad
+p_{\mathrm{BatchInference}}=0.10,\qquad
+p_{\mathrm{RealTimeInference}}=0.08,
+\]
+单位均为MW/等效GPU。任务$i$运行时产生的AI IT功率为
+\[
+P_i^{\mathrm{AI}}=g_i p_{k_i}.
+\]
+
+由于任务持续时间以分钟计量，且部分任务会跨越多个小时，本文不将任务持续时间简单向上取整后在每个小时计入完整负荷。设任务$i$的开工时刻为$s_i$，持续时间为$d_i$分钟，则任务在小时$t$内的实际重叠时长定义为
+\[
+q_{it}
+=
+\left[
+\min\left(t+1,s_i+\frac{d_i}{60}\right)
+-
+\max(t,s_i)
+\right]_{+},
+\]
+其中$[z]_{+}=\max(z,0)$，且$0\leq q_{it}\leq1$。因此，任务$i$在小时$t$内形成的GPU-hour占用为$g_iq_{it}$。给定任务执行区域$r_i$后，区域$r$在小时$t$的AI IT负荷为
+\[
+P_{r,t}^{\mathrm{AI}}
+=
+\sum_{i:r_i=r}
+g_iq_{it}p_{k_i}.
+\]
+
+将调度形成的AI负荷与不可迁移的非AI负荷相加，可得区域总IT负荷和设施侧负荷：
+\[
+P_{r,t}^{\mathrm{IT}}
+=
+P_{r,t}^{\mathrm{NonAI}}
++
+P_{r,t}^{\mathrm{AI}},
+\]
+\[
+P_{r,t}^{\mathrm{facility}}
+=
+\mathrm{PUE}_{r}P_{r,t}^{\mathrm{IT}}.
+\]
+上述转换同时保留了任务持续时间、任务类型和区域PUE差异，使GPU容量约束、IT功率约束和设施功率约束能够采用统一的小时级口径。
+
+\subsection{输入字段与基准字段划分}
+
+\texttt{region\_time\_data.xlsx}同时包含外生输入、基准状态和基准结果三类字段。电价、售电价格、碳强度、可用新能源和非AI IT负荷属于外生输入；原始IT负荷、设施负荷、购售电功率、充放电功率、弃风弃光量、碳排放和SOC等字段主要用于描述附件给出的基准运行状态。
+
+因此，在问题二和问题四中，本文仅提取逐时电价、碳强度、可用新能源和非AI负荷等外生字段，并根据任务调度结果重新计算AI IT负荷和设施负荷，不将附件中的原始\texttt{IT\_Load\_MW}、购售电和储能结果固定为优化输入。问题三则按照题目统一口径，将
+\[
+P_{r,t}^{\mathrm{IT,Q3}}
+=
+P_{r,t}^{\mathrm{Baseline\_AI}}
++
+P_{r,t}^{\mathrm{NonAI}}
+\]
+作为给定IT负荷，仅重新优化储能充放电、购售电和新能源分配策略。附件中的基准结果只用于方案对比和改进效果评价。
+
+\subsection{特殊数据口径处理}
+
+储能状态一致性检查发现，RegionE第$0$小时的基准SOC与储能参数表给出的初始SOC及状态递推公式之间存在约$1$ MWh的局部差异。按照附件规定的递推关系，由
+\[
+\mathrm{SOC}_{E,0}^{\mathrm{calc}}
+=
+370+0.94\times116.3126
+=
+479.333844\ \mathrm{MWh},
+\]
+而区域逐时数据中的基准值为$478.3339$ MWh。根据组委会答疑，本文保留储能参数表中的
+$\mathrm{InitialSOC}_{E}=370$ MWh，并在储能优化中依据统一状态方程重新计算SOC序列，不将该局部基准残差作为新的初始状态。其他区域的SOC递推误差均处于数据保留精度范围内。
+
+此外，检查发现六个区域的\texttt{AvailableRenewable\_MW}在相同时段具有相同数值。由于数据字典将该字段定义为区域--小时级可用新能源输入，本文在公共数据预处理阶段保留原始序列，不对其进行删除、缩放或经验修正；其在问题二和问题四中的区域使用方式、新能源分配规则及利用率分母口径，将在相应模型中进一步明确。
+
+经过上述处理，最终形成任务级建模表、区域静态参数表和区域--小时参数表。问题一从中提取历史需求序列与基础调度参数，问题二结合真实任务和外生电力参数进行碳感知调度，问题三使用固定计算负荷和储能参数，问题四则调用全部统一数据，实现多区域算力、储能与电力系统的联合优化。
+
+\section{问题一：GPU需求预测模型与算力模型构建与求解}
+\FloatBarrier
+
+% 需要的宏包：ctex, amsmath, amssymb, booktabs, graphicx
+% 建议：\graphicspath{{figures/}}，并将 q1/outputs/figures/ 下的 png 复制到该目录
+
+\subsection{问题分析}
+\label{sec:q1-analysis}
+
+问题一要求对历史 AI 任务的 GPU 需求进行统计分析，在此基础上构建短期需求预测模型，并针对最后 $24$ 小时真实到达的任务建立基础算力调度模型。因此，本问可分为 GPU 需求预测和基础算力调度两个相互衔接的部分。\textbf{对于 GPU 需求预测}，本文按“区域--任务类型”构建 $18$ 条小时级 GPU 需求序列，并分析其波动性与周期特征。考虑到 GPU 需求由任务到达数量和单任务 GPU 规模共同决定，建立复合泊松预测模型，通过滚动回测与基准模型比较完成模型选择，最终给出第 $2376$--$2399$ 小时的点预测、预测区间及误差评价。\textbf{对于基础算力调度}，本文使用第 $2376$--$2399$ 小时真实到达的任务确定其执行区域与开工时刻。模型采用分钟级重叠系数计算实际资源占用，并考虑前序任务的 carry-in 占用以及 GPU 容量、功率、网络时延和完成时限等约束。求解时先用动态贪心算法生成可行方案，再采用字典序混合整数线性规划依次优化等待时间和峰值 GPU 利用率，最后通过独立校验验证方案的可行性。
+
+\subsection{数据准备与统计分析}
+\label{sec:q1-data}
+
+\subsubsection{数据来源与质量检查}
+
+问题一使用任务记录、区域运行数据、GPU 资源信息、任务功率映射和区域间网络时延五类数据。任务记录包含任务类型、到达时刻、GPU 需求、预计执行时长及服务约束；区域运行数据给出各区域逐小时的非 AI 负荷；GPU 资源信息提供可用 GPU 数量、IT 功率上限、PUE 及设施功率上限；功率映射和网络时延数据分别用于计算 AI 任务功率和判断跨区域执行的可行性。储能数据不参与问题一的预测与基础算力调度。
+
+数据质量检查结果见表~\ref{tab:data-audit}。任务表包含 $50{,}000$ 条记录，\textbf{不存在重复任务编号和缺失值}；任务到达时刻、GPU 需求和执行时长均处于题目给定的合理范围。区域小时数据共包含 $14{,}442$ 条记录，完整覆盖六个区域的第 $0$--$2406$ 小时，且无重复和缺失。\textbf{因此，本文不对原始任务进行删除、插值或异常值截断，仅进行字段统一、任务功率映射和小时级数据聚合。}
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\caption{原始数据质量检查结果}
+\label{tab:data-audit}
+\begin{tabular}{lc}
+\toprule
+检查项目 & 检查结果 \\
+\midrule
+任务记录数 & $50{,}000$ \\
+重复 TaskID 数 & $0$ \\
+完全重复任务数 & $0$ \\
+任务表缺失单元格数 & $0$ \\
+任务到达时刻范围 & $0$--$2399$ \\
+单任务 GPU 需求范围 & $1$--$127$ \\
+任务执行时长范围 & $10$--$399$ 分钟 \\
+任务执行方式 & 全部不可抢占 \\
+区域小时记录数 & $14{,}442$ \\
+区域小时重复记录数 & $0$ \\
+区域小时缺失单元格数 & $0$ \\
+第 $2376$--$2399$ 小时到达任务数 & $538$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{统计指标与小时序列构建}
+
+为分别描述任务到达频率、瞬时算力需求和持续执行产生的工作量，按照区域 $r$、任务类型 $k$ 和小时 $t$ 构建三类指标。\textbf{小时到达任务数}为
+\begin{equation}
+N_{rkt}=\sum_i\mathbb{I}(a_i=t,\ o_i=r,\ k_i=k),
+\end{equation}
+\textbf{小时到达 GPU 需求}为
+\begin{equation}
+D_{rkt}=\sum_i g_i\mathbb{I}(a_i=t,\ o_i=r,\ k_i=k),
+\end{equation}
+考虑\textbf{任务持续时间后的 GPU-hour 工作量}为
+\begin{equation}
+W_{rkt}=\sum_i g_i\frac{d_i}{60}
+\mathbb{I}(a_i=t,\ o_i=r,\ k_i=k),
+\end{equation}
+其中，$a_i$、$o_i$、$k_i$、$g_i$ 和 $d_i$ 分别表示任务 $i$ 的到达小时、来源区域、任务类型、GPU 需求和执行时长。
+
+本文将\textbf{小时到达 GPU 需求 $D_{rkt}$ 作为主要预测目标}，因为它能够直接反映任务到达时产生的算力需求；任务数 $N_{rkt}$ 用于描述任务到达过程，GPU-hour $W_{rkt}$ 则用于衡量考虑执行时长后的资源压力。按照六个区域和三类任务构建 $18$ 条长度为 $2400$ 的小时序列。当某一区域和任务类型在某小时没有任务到达时，对应值记为零，该零值表示真实的无任务到达，而非原始数据缺失。
+
+\subsubsection{不同任务类型的 GPU 需求特征}
+
+三类任务的数量占比均约为三分之一，但其资源需求差异显著，具体统计结果见表~\ref{tab:type-statistics}。AI 训练、批量推理和实时推理任务的数量分别为 $16{,}559$、$16{,}717$ 和 $16{,}724$，说明\textbf{三类任务在数量上基本均衡。}
+
+然而，AI 训练任务的单任务平均 GPU 需求为 $71.28$，明显高于批量推理的 $13.52$ 和实时推理的 $4.02$。三类任务的平均执行时长均约为 $204$ 分钟，因此不同类型任务的算力消耗差异主要来自 GPU 规模，而非执行时长。AI 训练任务以 $33.12\%$ 的数量占比贡献了 $80.10\%$ 的到达 GPU 需求和 $80.14\%$ 的 GPU-hour 工作量，呈现出\textbf{任务数量近似均衡、资源需求高度不均衡}的特征。
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\caption{不同任务类型的 GPU 需求统计}
+\label{tab:type-statistics}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{lrrrrrr}
+\toprule
+任务类型 & 任务数 & 数量占比 & 单任务平均GPU & 平均时长(min) & GPU需求占比 & GPU-hour占比 \\
+\midrule
+AITraining
+& $16{,}559$ & $33.12\%$ & $71.28$ & $204.51$ & $80.10\%$ & $80.14\%$ \\
+BatchInference
+& $16{,}717$ & $33.43\%$ & $13.52$ & $204.21$ & $15.34\%$ & $15.32\%$ \\
+RealTimeInference
+& $16{,}724$ & $33.45\%$ & $4.02$ & $203.93$ & $4.56\%$ & $4.54\%$ \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+由图~\ref{fig:task-type-resource-share} 与图~\ref{fig:region-type-gpu} 可见，三类任务的数量占比均约为三分之一，但其资源需求分布存在显著差异。\textbf{AI 训练任务}仅占任务总数的 $33.12\%$，却贡献了 $80.10\%$ 的 GPU 需求和 $80.14\%$ 的 GPU-hour 工作量，是系统算力资源消耗的主要来源。
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}[t]{0.46\textwidth}
+\centering
+\includegraphics[width=\linewidth]{task_type_resource_share.png}
+\caption{任务类型数量与 GPU 资源占比}
+\label{fig:task-type-resource-share}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.52\textwidth}
+\centering
+\includegraphics[width=\linewidth]{01_region_type_gpu.png}
+\caption{各区域$\times$任务类型累计 GPU 需求}
+\label{fig:region-type-gpu}
+\end{subfigure}
+\caption{问题一：任务类型与区域 GPU 需求结构}
+\end{figure}
+
+相比之下，批量推理和实时推理任务的数量占比分别为 $33.43\%$ 和 $33.45\%$，但其 GPU 需求占比仅为 $15.34\%$ 和 $4.56\%$。这说明仅依据任务数量无法准确衡量系统负荷，还需同时考虑单任务 GPU 规模与执行时长。
+由此可见，\textbf{AI 训练任务是系统 GPU 容量压力的主要来源；批量推理任务的资源需求居中}；实时推理任务虽然数量较多，但单任务规模较小，其主要调度难点是对等待时间和网络时延较为敏感。
+
+\subsubsection{不同区域的 GPU 需求特征}
+
+不同区域、不同任务类型的累计 GPU 需求如图~\ref{fig:region-type-gpu} 所示。RegionD、RegionE 和 RegionF 的 AI 训练负荷明显高于其他区域，而 RegionA、RegionB 和 RegionC 则承接了更多实时推理任务，表明各区域之间存在\textbf{明显的任务类型分工和空间异质性}。
+
+从任务分布看，RegionD、RegionE 和 RegionF 共承接了约 $84.5\%$ 的 AI 训练任务，而 RegionA、RegionB 和 RegionC 共承接了约 $90.2\%$ 的实时推理任务。由于 AI 训练任务的单任务 GPU 需求较高，RegionD、RegionE 和 RegionF 合计贡献了约 $75.0\%$ 的系统 GPU 需求。
+
+\begin{table}[H]
+\centering
+\small
+\caption{不同区域的 GPU 需求统计}
+\label{tab:region-statistics}
+\begin{tabular}{lrrrr}
+\toprule
+区域 & 任务数 & 累计GPU需求 & GPU需求占比 & GPU-hour占比 \\
+\midrule
+RegionA & $10{,}062$ & $131{,}721$ & $8.94\%$  & $8.93\%$  \\
+RegionB & $9{,}200$  & $126{,}814$ & $8.61\%$  & $8.58\%$  \\
+RegionC & $7{,}559$  & $110{,}624$ & $7.51\%$  & $7.47\%$  \\
+RegionD & $9{,}560$  & $454{,}967$ & $30.87\%$ & $30.85\%$ \\
+RegionE & $6{,}912$  & $324{,}176$ & $22.00\%$ & $21.66\%$ \\
+RegionF & $6{,}707$  & $325{,}312$ & $22.08\%$ & $22.51\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+RegionA 的任务数量最多，但其 GPU 需求占比仅为 $8.94\%$，说明该区域\textbf{主要接收规模较小的实时推理任务}；RegionD 的任务数量占比为 $19.12\%$，GPU 需求占比却达到 $30.87\%$，说明该区域主要承担大规模训练任务。因此，仅根据任务数量无法准确评价区域算力压力，必须同时考虑 GPU 需求和 GPU-hour。区域间负荷的不均衡也为后续跨区域迁移和削峰调度提供了优化空间。
+
+\subsubsection{GPU 需求的时间序列特征}
+
+全系统逐小时到达 GPU 需求如图~\ref{fig:hourly-gpu} 所示。\textbf{需求序列具有较强的随机波动}，并伴随局部尖峰，\textbf{但未呈现稳定的日周期或周周期。}图中红色区域为第 $2376$--$2399$ 小时的最终测试窗口，该区间仅用于模型定型后的预测评价，不参与模型选择和参数调整。为进一步检验需求序列的时间相关性，\textbf{分别计算 $18$ 条区域--任务类型序列在滞后 $1$、$24$ 和 $168$ 小时处的自相关系数}，结果见图~\ref{fig:acf-diagnostics}。所有自相关系数的绝对值均小于 $0.042$，表明相邻小时、相同日内时刻和相同周内时刻之间\textbf{均不存在明显的线性相关性。}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}[t]{0.48\textwidth}
+\centering
+\includegraphics[width=\linewidth]{02_hourly_gpu_demand.png}
+\caption{全系统逐小时 GPU 需求及测试窗口}
+\label{fig:hourly-gpu}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.48\textwidth}
+\centering
+\includegraphics[width=\linewidth]{03_acf_diagnostics.png}
+\caption{$18$ 条序列自相关诊断}
+\label{fig:acf-diagnostics}
+\end{subfigure}
+\caption{问题一：需求时序特征与残差诊断}
+\end{figure}
+
+上述结果表明，GPU 需求具有\textbf{强随机波动、弱周期相关}的特征，直接复制前 $24$ 小时或前 $168$ 小时需求难以获得稳定预测效果，也缺乏使用复杂深度时序模型的充分依据。
+
+进一步对小时任务数量进行均值--方差检验，发现 $18$ 条序列的离散指数处于 $0.95$--$1.07$ 之间，整体接近泊松分布的理论值 $1$；经验零值率也与泊松模型的理论零概率 $e^{-\lambda}$ 基本一致，仅 RegionD 的 AI 训练任务存在轻微过度离散。因此，后续预测采用\textbf{任务到达数量与单任务 GPU 规模相结合的复合泊松模型}，并通过滚动回测检验其相对于历史均值、局部均值、指数加权均值和周期滞后模型的实际效果。
+
+\subsection{GPU 需求预测模型}
+\label{sec:q1-forecast}
+
+\subsubsection{预测目标与建模思路}
+
+短期预测的目标是：仅利用第 $0$--$2375$ 小时的历史信息，预测第 $2376$--$2399$ 小时各区域、各任务类型的 GPU 需求，并用真实值评价预测精度。结合前文统计分析结果，GPU 需求具有\textbf{强随机波动、弱周期相关}的特征，因此不宜先验采用复杂时序模型。
+
+本文将区域 $r$、任务类型 $k$、小时 $t$ 的到达 GPU 需求写为复合计数过程
+\begin{equation}
+D_{rkt}=\sum_{j=1}^{N_{rkt}}G_{rkj},
+\end{equation}
+其中，$N_{rkt}$ 表示该小时到达的任务数量，$G_{rkj}$ 表示第 $j$ 个任务的 GPU 需求。相应地，预测由两部分组成：一是估计任务到达率，二是刻画单任务 GPU 规模分布。由于最终调度直接使用真实任务，本部分预测结果仅用于容量规划与风险评价，不作为调度输入。
+
+\subsubsection{复合泊松预测模型}
+
+任务到达数量采用泊松分布描述：
+\begin{equation}
+N_{rkt}\sim\mathrm{Poisson}(\lambda_{rk}),
+\qquad
+\widehat{\lambda}_{rk}=\frac{1}{T}\sum_{\tau=1}^{T}N_{rk\tau},
+\end{equation}
+其中 $T=2376$ 为训练样本长度。单任务 GPU 规模不预先假设特定参数分布，而直接使用区域--类型历史任务的经验分布：
+\begin{equation}
+G_{rk}^{*}\sim\widehat{F}_{rk}^{\mathrm{empirical}}.
+\end{equation}
+据此，均值点预测为
+\begin{equation}
+\widehat{D}_{rkt}^{\mathrm{mean}}=\widehat{\lambda}_{rk}\,\widehat{\mu}_{rk}^{G},
+\end{equation}
+其中 $\widehat{\mu}_{rk}^{G}$ 为对应分组的历史平均 GPU 需求。
+
+为给出预测区间，采用 Bootstrap 模拟：对未来 $24$ 小时的每一个区域--类型组合，先按泊松分布抽样任务数，再从经验分布中有放回抽取单任务 GPU 规模并求和，重复 $3000$ 次，得到条件中位数及 $5\%$--$95\%$ 区间。复合泊松模型与全历史均值的点预测在数学上恒等，即
+\begin{equation}
+\mathbb{E}[D]=\mathbb{E}[N]\,\mathbb{E}[G],
+\end{equation}
+其新增价值在于能够给出完整的需求分布和容量风险区间。
+
+进一步的计数诊断表明，$18$ 条任务数量序列中仅有 $1$ 条在 $5\%$ 显著性水平上存在过度离散，并按 AIC 更偏好负二项分布。因此，本文将泊松模型作为简洁主模型；负二项分布可作为区间稳健性扩展，但不改变均值点预测。
+
+\subsubsection{候选模型与滚动回测}
+
+为避免模型选择偏向某一特定窗口，设置 $8$ 个严格前滚的 $24$ 小时验证窗口，窗口起点依次为第 $2184$、$2208$、$\dots$、$2352$ 小时。每次仅使用验证窗口之前的数据估计模型，严禁未来信息泄漏。候选模型包括：全历史均值、最近 $72/168/336$ 小时局部均值、慢速 EWMA、复合泊松，以及滞后 $24$ 小时和滞后 $168$ 小时的周期复制模型。
+
+评价时先比较平均 MAE、RMSE 和 WAPE，再对近优模型比较最大后悔值（Maximum Regret）和欠预测风险。模型 $m$ 在窗口 $w$ 的后悔值定义为
+\begin{equation}
+R_{mw}=L_{mw}-\min_j L_{jw},
+\end{equation}
+最大后悔值为 $MR_m=\max_w R_{mw}$。各模型的滚动回测结果见表~\ref{tab:forecast-backtest}，RMSE 对比见图~\ref{fig:backtest-rmse}。
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{滚动回测结果（按平均 RMSE 升序排列，前五名）}
+\label{tab:forecast-backtest}
+\begin{tabular}{lccccc}
+\toprule
+模型 & MAE & RMSE & WAPE & Max Regret & Under$_{Q95}$ \\
+\midrule
+compound\_poisson & $26.35$ & $50.82$ & $0.765$ & $0.082$ & $83.00$ \\
+history\_mean     & $26.35$ & $50.82$ & $0.765$ & $0.082$ & $83.00$ \\
+ewma\_0.003       & $26.48$ & $50.88$ & $0.769$ & $0.207$ & $82.29$ \\
+ewma\_0.01        & $26.50$ & $50.91$ & $0.770$ & $0.255$ & $81.87$ \\
+window\_168       & $26.47$ & $50.93$ & $0.769$ & $0.317$ & $82.18$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+结果表明，复合泊松与全历史均值在点预测精度上并列最优，且最大后悔值最小，说明其跨窗口表现最为稳健；局部均值和 EWMA 略差；滞后 $24$ 小时与滞后 $168$ 小时模型明显落后，进一步印证了前文“弱周期性”的判断。据此，本文选择\textbf{复合泊松模型}作为最终预测模型：它在点预测上与最优均值模型一致，同时还能输出概率区间。
+
+\subsubsection{最终预测结果与评价}
+
+用第 $0$--$2375$ 小时数据重新训练复合泊松模型，对第 $2376$--$2399$ 小时进行一次性预测。全系统到达 GPU 的点预测、真实值及 $90\%$ 预测区间如图~\ref{fig:final-forecast} 所示。可以看出，真实需求大体落在预测区间内，且局部尖峰能够被区间覆盖。
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}[t]{0.48\textwidth}
+\centering
+\includegraphics[width=\linewidth]{04_backtest_rmse.png}
+\caption{滚动 $24$ 小时回测 RMSE}
+\label{fig:backtest-rmse}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.48\textwidth}
+\centering
+\includegraphics[width=\linewidth]{05_final_forecast.png}
+\caption{第 $2376$--$2399$ 小时预测结果}
+\label{fig:final-forecast}
+\end{subfigure}
+\caption{问题一：回测对比与最终预测}
+\end{figure}
+
+由于底层 $18$ 序列存在大量零值和偶发尖峰，单一口径容易误导评价，本文同时报告多层级误差，结果见表~\ref{tab:forecast-multilevel}。底层 $18$ 序列的 WAPE 为 $65.65\%$，而全系统汇总后的 WAPE 降至 $24.30\%$；区域层与类型层分别介于两者之间。这说明细粒度序列更难预测，但\textbf{系统总量预测已具备较好的容量规划参考价值}。最终 $24$ 小时的 $90\%$ 区间经验覆盖率为 $93.75\%$，落在实用区间 $85\%$--$95\%$ 内，表明风险校准总体合理。
+
+\begin{table}[H]
+\centering
+\small
+\caption{最终 $24$ 小时多层级预测误差（到达 GPU）}
+\label{tab:forecast-multilevel}
+\begin{tabular}{lcccc}
+\toprule
+评价层级 & MAE & RMSE & WAPE & 欠预测比例 \\
+\midrule
+底层 $18$ 序列 & $26.52$  & $53.79$  & $65.65\%$ & $40.51\%$ \\
+区域层 $6$    & $65.62$  & $95.10$  & $54.15\%$ & $44.44\%$ \\
+类型层 $3$    & $67.09$  & $122.55$ & $27.69\%$ & $59.72\%$ \\
+系统层 $1$    & $176.68$ & $221.05$ & $24.30\%$ & $70.83\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+附件未指定唯一的“预测验证目标”，因此进一步补充任务数、到达 GPU 和 GPU-hour 三种物理口径的系统级结果，见表~\ref{tab:forecast-three-targets}。其中，到达 GPU 是瞬时算力容量的主指标，GPU-hour 反映持续执行后的工作量，任务数对应复合计数过程。三者共同报告，可避免用单一口径替代题意。
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{最终 $24$ 小时系统级三目标预测误差}
+\label{tab:forecast-three-targets}
+\begin{tabular}{lcccc}
+\toprule
+预测目标 & MAE & RMSE & WAPE & Bias \\
+\midrule
+任务数 TaskCount     & $3.48$   & $4.38$   & $15.51\%$ & $0.071$ \\
+到达 GPU             & $176.68$ & $221.05$ & $24.30\%$ & $0.157$ \\
+GPU-hour 工作量      & $748.65$ & $995.82$ & $29.95\%$ & $0.165$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+综上，复合泊松模型在滚动回测中与最优均值模型并列，并在最终测试中给出了可接受的点预测精度和较合理的区间覆盖。底层序列误差较大主要来自零值和突发，系统级误差更贴近容量规划需求。后续基础算力调度将直接使用真实到达任务，而不再依赖本节预测值。
+
+\subsection{基础算力调度模型}
+\label{sec:q1-schedule}
+
+本节使用第 $2376$--$2399$ 小时真实到达的 $538$ 个任务建立基础算力调度模型，\textbf{目标是在满足全部物理与
+服务硬约束的前提下，为每个任务确定执行区域与开工时刻}，并在保证服务质量的同时降低区域峰值负载。
+
+\subsubsection{模型假设与决策变量}
+沿用前文记号：任务集合 $\mathcal{I}$（$|\mathcal{I}|=538$）、区域 $\mathcal{R}$、类型 $\mathcal{K}$；
+任务 $i$ 具有到达小时 $a_i$、GPU 需求 $g_i$、时长 $d_i$（分钟）、来源区域 $o_i$、类型 $k_i$、最大时延
+$L_i^{\max}$ 与最晚完成小时 $H_i$。假设任务\textbf{不可抢占、不可拆分、连续执行}，实时推理任务须
+到达即开工，任务可跨区执行但须满足时延约束。
+
+对每个任务枚举其所有\emph{可行}的“区域--开工时刻”组合，构成候选集合 $\mathcal{C}_i$，引入 0--1 变量
+\begin{equation}
+x_{i,r,s}=
+\begin{cases}1, & \text{任务 }i\text{ 在区域 }r\text{、第 }s\text{ 小时开工},\\ 0,&\text{否则},\end{cases}
+\qquad (r,s)\in\mathcal{C}_i,
+\end{equation}
+并要求每个任务恰好选择一个候选：$\sum_{(r,s)\in\mathcal{C}_i}x_{i,r,s}=1$。该建模使不可抢占、不可拆分、
+不可迁移自动成立。由于任务以分钟计而容量以小时计，定义\textbf{分钟级重叠系数}
+\begin{equation}
+q_{i,s,t}=\frac{\text{任务 }i\text{（第 }s\text{ 小时开工）在第 }t\text{ 小时内运行的分钟数}}{60}\in[0,1],
+\end{equation}
+它是可预先计算的常数，从而在精确刻画占用的同时保持模型线性。此外，将第 $2376$ 小时前到达、跨入窗口的
+$58$ 个前序任务的占用冻结为常数 $P^{\mathrm{gpu,carry}}_{r,t}$ 与 $P^{\mathrm{pow,carry}}_{r,t}$
+（carry-in），计入下节容量约束，以免高估可用资源。
+
+\subsubsection{约束条件}
+对任意区域 $r$ 与小时 $t$：GPU 使用不超过可用容量 $G_r$，IT 与设施功率不超过各自上限
+（$\pi_{k}$ 为类型 $k$ 每 GPU 功率，$L^{\mathrm{nonAI}}_{r,t}$ 为非 AI 负荷）：
+\begin{align}
+& P^{\mathrm{gpu,carry}}_{r,t}+\sum_{i,s} g_i\,q_{i,s,t}\,x_{i,r,s}\ \le\ G_r, \label{eq:c-gpu}\\
+& L^{\mathrm{nonAI}}_{r,t}+P^{\mathrm{pow,carry}}_{r,t}+\sum_{i,s} g_i\,\pi_{k_i}\,q_{i,s,t}\,x_{i,r,s}
+   \ \le\ P^{\mathrm{IT}}_r, \label{eq:c-it}\\
+& \mathrm{PUE}_r\Big(L^{\mathrm{nonAI}}_{r,t}+P^{\mathrm{pow,carry}}_{r,t}
+   +\textstyle\sum_{i,s} g_i\,\pi_{k_i}\,q_{i,s,t}\,x_{i,r,s}\Big)\ \le\ P^{\mathrm{FAC}}_r. \label{eq:c-fac}
+\end{align}
+时间与服务约束为：开工不早于到达（$s\ge a_i$）、实时任务立即开工（$s=a_i$）、完成时间满足
+$s+d_i/60\le\min(H_i,2406)$（既不超截止、也不占用第 $2406$ 小时）；时延约束
+$\ell(o_i,r)\le L_i^{\max}$ 已在候选生成时保证。
+
+\subsubsection{优化目标与求解策略}
+引入峰值利用率变量 $U$，对每个 $(r,t)$ 施加联结约束
+$\big(P^{\mathrm{gpu,carry}}_{r,t}+\sum_{i,s} g_i q_{i,s,t}x_{i,r,s}\big)/G_r\le U$，则最小化 $U$ 即
+削峰。为兼顾服务质量，采用\textbf{字典序}目标：
+\begin{align}
+\textbf{阶段一：}\ & \min\ \bar{W}=\tfrac{1}{|\mathcal{I}|}\textstyle\sum_{i,r,s}(s-a_i)\,x_{i,r,s};\\
+\textbf{阶段二：}\ & \min\ U \quad\text{s.t.}\ \ \bar{W}\le 1.05\,\bar{W}^\ast,
+\end{align}
+其中 $\bar{W}^\ast$ 为阶段一最优平均等待。实测 $\bar{W}^\ast=0$，故阶段二在近似零等待下最小化峰值；
+目标另含 $10^{-5}\!\sim\!10^{-6}$ 量级的迁移、时延、尾段平滑项用于择优。为刻画服务--削峰权衡，进一步以
+$\varepsilon$-约束（固定 $\bar{W}\le\varepsilon$ 后最小化 $U$）扫描前沿。
+
+模型为含约 $3.4\times10^{4}$ 个 0--1 变量的大规模 MILP，采用两段式求解：先以\textbf{动态贪心}
+（实时任务、可行区域少、松弛小、GPU-hour 大者优先）生成可行解作为\textbf{热启动}，再由开源求解器
+HiGHS 在全部候选上做全时域优化，设定时限并记录 MIP gap；贪心保证时限内始终有合法解并加速收敛。
+所有方案均由独立程序从排程表逐小时重算全部硬约束，而非采信求解器汇总。
+
+\subsubsection{求解结果与分析}
+主推的字典序方案取得平均等待 $\mathbf{0.000}$ 小时、峰值利用率 $\mathbf{56.5\%}$、迁移率 $12.3\%$，
+MIP gap 仅 $\mathbf{0.53\%}$（求解器返回 Optimal），对 $538$ 个新任务与 $58$ 个 carry-in 任务的全部
+硬约束\textbf{零违规}。表~\ref{tab:sched-compare} 对比五种方案：主推解同时优于 Local-First 的峰值与
+加权 MILP 的等待，位于帕累托前沿。
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\caption{五种调度方案指标对比（均通过全部硬约束校验）}
+\label{tab:sched-compare}
+\begin{tabular}{lcccccc}
+\toprule
+方案 & 平均等待(h) & 最大等待(h) & 迁移率 & 峰值利用率 & 平均利用率 & MIP gap \\
+\midrule
+Local-First          & 0.020 & 4  & 0.0\%  & 99.97\% & 37.2\% & --- \\
+Most-Available       & 1.119 & 18 & 53.0\% & 57.5\%  & 39.0\% & --- \\
+Dynamic-Greedy       & 0.065 & 5  & 1.5\%  & 93.2\%  & 37.3\% & --- \\
+加权 MILP（极限削峰）  & 0.413 & 17 & 3.7\%  & 49.3\%  & 38.6\% & 13.89\% \\
+\textbf{字典序（主推）} & \textbf{0.000} & \textbf{0} & 12.3\% & \textbf{56.5\%} & 38.8\% & \textbf{0.53\%} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+主推方案的排程甘特图见图~\ref{fig:gantt}，灰色为 $2400$--$2406$ 收尾段；含 carry-in 的六区域逐时
+GPU 利用率见图~\ref{fig:util}，负载在区域与时间上分布均衡且无越限。
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}[t]{0.52\textwidth}
+\centering
+\includegraphics[width=\linewidth]{06_schedule_gantt.png}
+\caption{主推方案调度甘特图（灰为收尾段）}
+\label{fig:gantt}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.46\textwidth}
+\centering
+\includegraphics[width=\linewidth]{07_gpu_utilization.png}
+\caption{六区域逐时 GPU 利用率}
+\label{fig:util}
+\end{subfigure}
+\caption{问题一：调度结果与利用率}
+\end{figure}
+
+服务与削峰之间的权衡由 $\varepsilon$-约束前沿刻画（表~\ref{tab:pareto} 与图~\ref{fig:pareto}）：
+随着允许等待放宽，峰值可进一步降至 $52.7\%$，但相应算例在时限内未完全收敛，仅作可行域展示。
+
+\begin{table}[H]
+\centering
+\footnotesize
+\caption{服务--削峰权衡：字典序解与 $\varepsilon$-约束前沿}
+\label{tab:pareto}
+\begin{tabular}{lccccc}
+\toprule
+场景 & 等待上限 $\varepsilon$(h) & 平均等待(h) & 峰值利用率 & MIP gap & 求解状态 \\
+\midrule
+阶段一（仅最小化等待）  & ---         & 0.000 & 99.61\% & 0.00\%  & Optimal \\
+\textbf{字典序（主推）} & $\approx 0$ & 0.000 & 56.47\% & 0.53\%  & Optimal \\
+$\varepsilon=0.05$    & 0.05        & 0.048 & 54.64\% & 12.28\% & 时限 \\
+$\varepsilon=0.10$    & 0.10        & 0.080 & 54.58\% & 16.86\% & 时限 \\
+$\varepsilon=0.20$    & 0.20        & 0.177 & 52.67\% & 18.27\% & 时限 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.68\textwidth]{09_full_pareto.png}
+\caption{各调度方案的服务--削峰权衡；红星为主推的字典序方案。}
+\label{fig:pareto}
+\end{figure}
+\FloatBarrier
+
+综上，本模型在可行性上实现零违规，并以字典序解在近似零等待下将峰值利用率降至 $56.5\%$（gap $0.53\%$），
+具备可解释的全局改进。需说明的是：加权 MILP 虽可将峰值进一步压至 $49.3\%$，但以平均等待升至
+$0.413$ 小时为代价，且在时限内 gap 为 $13.89\%$，属“时限内最好可行折中解”，并非已证明的全局最优，
+仅作为极限削峰情景对照；$\varepsilon$-约束前沿的部分算例亦未完全收敛。整体而言，字典序主推解在服务
+质量、削峰能力与最优性证据三方面取得了良好平衡。
+
+\section{问题二：碳感知任务调度模型构建与求解}
+\FloatBarrier
+
+\subsection{问题分析}
+问题二要求建立碳感知任务调度模型，针对第0-2399小时内实际到达的全部任务，以任务迁移决策和开工时段为决策变量，在满足各区域GPU容量、IT功率上限、网络时延阈值及任务最晚完成时限等约束条件下，同时优化系统运行成本、碳排放量、网络时延和新能源利用率四个目标。该问暂不考虑储能系统的充放电行为，假定各任务的负荷均能由当小时可用新能源和电网购电共同满足。
+
+本问建模为多目标混合整数规划，由于任务繁多规模庞大且含大量整型变量，直接使用精确求解器求解混合整数线性规划（MILP）在有限时间内难以获得全局最优解。因此，本问采用第二代非支配排序遗传算法（NSGA-II）作为求解框架。NSGA-II是一种经典的多目标进化算法，能够通过种群进化同时搜索多个Pareto最优解，特别适合于决策变量规模大、目标函数非线性或不可微的场景。通过设计的染色体编码、约束处理和目标函数构造，NSGA-II可以在合理时间内生成一组多样化的非支配解，为决策者提供丰富的权衡信息。
+
+\subsection{决策变量}
+为将实际任务调度问题转化为可求解的数学模型，本问引入决策变量以定量描述各个任务在区域和时间上的分配方案，准确表达任务的执行区域，起始和完成时刻，进而施加各项约束并计算优化目标。
+这里定义二元决策变量 $x_{i, r}$ 表示任务分配位置，定义 $y_{i, t}$ 表示任务开始时间：
+$$
+x_{i, r} = 
+\begin{cases} 
+1, & \text{若任务 } i \text{ 被调度到区域 } r \text{ 执行} \\ 
+0, & \text{否则} 
+\end{cases}
+$$
+$$
+y_{i, t} = 
+\begin{cases} 
+1, & \text{若任务 } i \text{ 在时刻 } t \text{ 开始执行} \\ 
+0, & \text{否则} 
+\end{cases}
+$$
+
+观察到变量$EstimatedDuration\_min$ (连续执行时长)的的计量单位为分钟，任务的执行时长可能跨越多个整点小时，而模型中的各项约束均按小时离散化处理。在此情形下，若仅采用二元变量表示任务是否运行，只能反映整小时的占用状态，无法刻画任务在单个小时内部分占用的实际情况，因此需要引入连续辅助变量来精确描述这种跨时段的时间分配关系。
+为方便计算和建立模型，引入辅助状态变量 $z_{i, r, t} \in [0, 1]$，表示任务 $i$ 在时刻 $t$ 在区域 $r$ 所占用的时间比例。如果任务 $i$ 在时段 $t$ 内完全运行，则 $z_{i, r, t} = 1$；若跨越时段边界，则依据重叠时间比例取小数。
+
+任务 $i$ 的开始时刻 $s_i$ 可由 $y_{i,t}$ 导出：
+\[
+s_i = \sum_{t \in \mathcal{T}^{\text{sch}}} t \cdot y_{i,t}.
+\]
+
+任务 $i$ 的执行区域 $r_i$ 可由 $x_{i,r}$ 导出：
+\[
+r_i = \sum_{r \in \mathcal{R}} r \cdot x_{i,r}.
+\]
+\subsection{约束条件}
+考虑到各区域在GPU容量，IT功率上限等方面存在差异，同时各任务在GPU需求量、时延敏感度、任务类型等属性上不同，为满足各区域固有的资源限制与各任务的执行要求，本模型须同时满足以下五类硬约束，以确保调度方案的可行性。
+
+\subsubsection{GPU容量约束}
+每个区域 \(r\) 在每个时刻 \(t\) 上运行的所有任务占用的等效GPU总数不得超过该区域的可用GPU数量 \(\mathrm{AvailableGPU}_r\)。令 \(\mathcal{T}_r(t)\) 表示时刻 \(t\) 在区域 \(r\) 上运行的任务集合，则：
+
+\[
+\sum_{i \in \mathcal{T}_r(t)} \mathrm{GPU\_Demand}_i \leq \mathrm{AvailableGPU}_r, \quad \forall r \in \mathcal{R},\; \forall t \in [0,2405]
+\]
+
+其中 \(\mathcal{R}\) 为区域集合（共6个区域），\(t\) 为小时索引。该约束保证了任意时刻各区域的计算资源不被超额占用。
+
+\subsubsection{IT功率上限约束}
+每个区域 \(r\) 在时刻 \(t\) 的总IT负荷（含AI任务产生的IT负荷与非AI固定IT负荷）不得超过该区域的最大IT功率 \(\mathrm{MaxITPower}_r\)。AI任务产生的IT负荷由正在运行的任务按其GPU需求与单位功率换算得到：
+
+\[
+\mathrm{NonAI\_IT\_Load}_{r,t} + \sum_{i \in \mathcal{T}_r(t)} \mathrm{GPU\_Demand}_i \cdot \mathrm{GpuPower}(\mathrm{TaskType}_i) \leq \mathrm{MaxITPower}_r,\]
+\[
+\quad \forall r \in \mathcal{R},\; \forall t \in [0,2405]
+\]
+
+其中 \(\mathrm{GpuPower}(\mathrm{TaskType}_i)\) 取自功率映射表，单位为MW/等效GPU。该约束确保了IT设备的供电容量不被超出。
+
+\subsubsection{网络时延约束}
+若任务 \(i\) 被迁移到非源区域 \(r\) 执行（即 \(r \neq \mathrm{SourceRegion}_i\)），则两区域间的网络时延必须小于等于该任务允许的最大时延 \(\mathrm{MaxLatency}_i\)。对于实时推理任务（\(\mathrm{DelaySensitivity}=\text{High}\)），其开始时间必须等于到达时间。：
+
+\[
+x_{i,r} \cdot \mathrm{Latency}(\mathrm{SourceRegion}_i, r) \leq \mathrm{MaxLatency}_i, \quad \forall i \in \mathcal{W},\; \forall r \in \mathcal{R}.
+\]
+$$
+y_{i, A_i} = 1, \quad \forall i \in I_{RealTime}
+$$
+
+其中\(\mathrm{Latency}(s,d)\) 由网络时延矩阵给出。
+
+\subsubsection{任务最晚完成时限约束}
+每个任务 \(i\) 必须在规定的截止时间前完成。令 \(s_i\) 为任务 \(i\) 的开工小时，\(\mathrm{Duration}_i = \lceil \mathrm{EstimatedDuration\_min}_i / 60 \rceil\) 为其所需连续运行小时数，则完成时刻为 \(s_i + \mathrm{Duration}_i - 1\)。该完成时刻必须不大于任务的最晚完成小时 \(\mathrm{LatestFinishHour}_i\)，且不得晚于系统整体截止时间2405小时：
+
+\[
+s_i + \mathrm{Duration}_i - 1 \leq \min(\mathrm{LatestFinishHour}_i,\, 2405), \quad \forall i \in \mathcal{W}.
+\]
+
+特别地，对于实时推理任务，其开工小时必须等于到达小时 \(\mathrm{ArrivalHour}_i\)，即 \(s_i = \mathrm{ArrivalHour}_i\)，且 \(\mathrm{LatestFinishHour}_i\) 通常很小（如到达后1～6小时内），因此该约束自动限制了实时任务的执行窗口。
+
+\subsubsection{任务不可拆分与不可抢占约束}
+每个任务都必须执行一次且一旦在某区域开工，必须连续运行直至完成，期间不允许中断、拆分或迁移到其他区域。该约束通过决策变量的定义需满足：
+$$
+\sum_{r \in R} x_{i, r} = 1, \quad \forall i \in I
+$$
+$$
+\sum_{t = A_i}^{2406 - D_i} y_{i, t} = 1, \quad \forall i \in I
+$$
+
+上述五类约束共同构成了调度问题的可行域，任何违反任一约束的调度方案均为非法解。
+
+
+\subsection{目标函数}
+
+本模型为多目标优化模型，依据问题2要求，涉及优化以下四个子目标：
+
+\textbf{1. 最小化系统运行总成本 ($F_{cost}$)}：
+成本主要由各区域数据中心消耗的电网购电费用构成：
+\[
+F_{\text{cost}} = \Delta t \sum_{t \in \mathcal{T}^{\text{ene}}} \sum_{r \in \mathcal{R}} \text{Purch}_{r,t} \cdot \text{Price}_{r,t},
+\]
+其中 $\Delta t = 1$ 小时，$\text{Purch}_{r,t}$ 为区域 $r$ 在时刻 $t$ 的购电功率（MW），由能源平衡方程决定。
+
+\textbf{2. 最小化总碳排放量 ($F_{carbon}$)}：
+碳排放量由实际来自于电网的购电量决定，新能源消纳不计碳排放：
+\[
+F_{\text{carbon}} = \Delta t \sum_{t \in \mathcal{T}^{\text{ene}}} \sum_{r \in \mathcal{R}} \text{Purch}_{r,t} \cdot \text{CarbonIntensity}_{r,t}.
+\]
+
+\textbf{3. 最小化平均网络时延 ($F_{latency}$)}：
+优化任务跨区域迁移产生的通信时延，按任务类型加权：
+\[
+F_{\text{latency}} = \frac{1}{|\mathcal{I}|} \sum_{i \in \mathcal{I}} w_{k_i}^{\text{delay}} \cdot \sum_{r \in \mathcal{R}} x_{i,r} \cdot \text{Lat}_{o_i, r},
+\]
+其中 $w_{k_i}^{\text{delay}}$ 为任务类型对应的时延敏感权重（实时推理取较大值，批量推理和AI训练取较小值）。
+
+\textbf{4. 最大化新能源利用率 ($F_{renew}$)}：
+定义为实际消纳的新能源总量占可用新能源总量的比例：
+\[
+F_{\text{renew}} = \frac{\sum_{t \in \mathcal{T}^{\text{ene}}} \sum_{r \in \mathcal{R}} \text{RenewUsed}_{r,t}}{\sum_{t \in \mathcal{T}^{\text{ene}}} \sum_{r \in \mathcal{R}} \text{Renew}_{r,t}^{\text{avail}} + \epsilon},
+\]
+其中 $\text{RenewUsed}_{r,t}$ 为实际消纳的新能源功率，满足 $0 \leq \text{RenewUsed}_{r,t} \leq \text{Renew}_{r,t}^{\text{avail}}$。
+
+
+在无储能条件下，每个区域 $r$ 在时刻 $t$ 的设施侧总负荷必须由新能源消纳与电网购电共同满足：
+\[
+\text{Purch}_{r,t} + \text{RenewUsed}_{r,t} = \text{Load}_{r,t}^{\text{total}}, \quad \forall r \in \mathcal{R},\; \forall t \in \mathcal{T}^{\text{ene}},
+\]
+其中设施侧总负荷为：
+\[
+\text{Load}_{r,t}^{\text{total}} = \left( \text{NonAI\_IT\_Load}_{r,t} + \sum_{i \in \mathcal{T}_r(t)} g_i \cdot \text{GpuPower}(k_i) \right) \times \text{PUE}_{r,t}.
+\]
+购电功率还需满足区域购电上限约束：
+\[
+0 \leq \text{Purch}_{r,t} \leq \text{MaxGridImport}_r, \quad \forall r \in \mathcal{R},\; \forall t \in \mathcal{T}^{\text{ene}}.
+\]
+
+
+\subsection{求解算法：贪婪算法}
+本问首先采用加权贪心算法。该算法将多目标优化问题通过线性加权法转化为单目标问题，其基本原理如下：
+
+给定四个优化目标：运行成本 \({F}_{cost}\)、碳排放量 \({F}_{carbon}\)、平均时延 \({F}_{latency}\) 和新能源利用率 \({F}_{renew}\)（\({F}_{renew}\) 为最大化目标），定义综合代价函数为：
+$$
+ J= \omega_1 {F}_{cost} + \omega_2 {F}_{carbon} + \omega_3 {F}_{latency} - \omega_4 {F}_{renew}
+$$
+其中 \(w_1, w_2, w_3, w_4\) 为权重系数，满足 \(\sum_{i=1}^4 w_i = 1\)，且 \(w_i \ge 0\)。算法在每个调度时刻，对所有候选资源节点计算该代价函数，并选择使 \(J\) 最小的节点执行任务。通过调整权重组合，可以模拟不同偏好下的调度策略，从而考察算法对权重的敏感性。
+
+如表\ref{tab:greedy_weights}本文设计了八组不同的权重向量，分别侧重成本、碳排放、时延、新能源利用率或其组合。
+\begin{table}[htbp]
+\centering
+\small
+\caption{八组贪心调度权重配置及其侧重点}
+\label{tab:greedy_weights}
+\begin{tabular}{llll}
+\toprule
+\textbf{方案名} & \textbf{权重 (cost, carbon, latency, renew)} & \textbf{侧重点} \\
+\midrule
+greedy\_balanced & (1.0, 1.0, 0.5, 0.5) & 均衡 \\
+greedy\_cost     & (1.0, 0.1, 0.1, 0.0) & 成本优先 \\
+greedy\_carbon   & (0.1, 1.0, 0.1, 0.0) & 碳优先 \\
+greedy\_renew    & (0.1, 0.1, 0.1, 1.0) & 新能源优先 \\
+greedy\_latency  & (0.1, 0.1, 1.0, 0.0) & 时延优先 \\
+greedy\_cost2    & (2.0, 0.5, 0.3, 0.2) & 成本主导混合 \\
+greedy\_bal2     & (0.5, 2.0, 0.5, 0.3) & 碳排放主导混合 \\
+greedy\_mix      & (1.5, 1.5, 0.8, 0.6) & 全面混合 \\
+\bottomrule
+\end{tabular}
+\end{table}
+\subsection{求解算法：NSGA-II}
+
+由于任务数量庞大，直接求解MILP在有限时间内难以获得全局最优解。本问采用第二代非支配排序遗传算法（NSGA-II）作为多目标优化引擎。NSGA-II通过模拟生物进化过程中的选择、交叉和变异操作，在多目标空间中搜索Pareto最优解集。NSGA-II能够使用非支配排序和拥挤度距离保持解的多样性和收敛性，同时无需对目标函数进行加权或归一化，可以直接处理多个冲突目标。
+
+\subsubsection{染色体编码}
+
+每个个体（染色体）代表一个完整的调度方案。由于决策变量为每个任务的执行区域和开工时刻，采用整数编码：染色体长度为任务总数 $|\mathcal{I}|$，第 $i$ 个基因位编码为一个整数 $c_i$，解码方式为：
+\[
+c_i = r_i \times |\mathcal{S}_i| + s_i^{\text{idx}},
+\]
+其中 $r_i$ 为执行区域的索引（0--5,即区域A到E），$|\mathcal{S}_i|$ 为任务 $i$ 的候选开工时刻数量，$s_i^{\text{idx}}$ 为候选开工时刻列表中的位置索引。这样单个整数唯一确定了任务的区域和开工时刻。
+
+\subsubsection{候选集生成}
+
+为减少搜索空间，可以预先利用约束条件。为满足网络时延约束和时限约束，对每个任务 $i$ 预先筛选可行的候选区域和开工时刻：
+\begin{itemize}
+    \item \textbf{候选区域集$\mathcal{R}_i$}：任务 \(i\) 可在源区域或非源区域执行。当任务 \(i\) 被迁移到非源区域 \(r\) 执行（即 \(r \neq \mathrm{SourceRegion}_i\)），则两区域间的网络时延必须小于等于该任务允许的最大时延 \(\mathrm{MaxLatency}_i\)。因此，候选区域集 $\mathcal{R}_i = \{ r \in \mathcal{R} \mid \text{Lat}_{o_i,r} \leq \text{MaxLatency}_i \}$。$\text{Lat}_{o_i,r} $是将任务 \(i\) 迁到区域\(r\) 时的网络时延。
+    \item \textbf{候选开工时刻集 $\mathcal{S}_i$}：根据问题设定，任务包括实时推理、批量推理和 AI 训练三类；实时推理任务到达即开工；批量推理和 AI 训练任务允许延后，每个任务 \(i\) 必须在规定的截止时间前完成。因此，对于实时推理任务，$\mathcal{S}_i = \{a_i\}$；对于弹性任务（批量推理、AI训练），$\mathcal{S}_i = \{a_i, a_i+1, \dots, D_i - d_i\}$，且满足 $s_i + d_i - 1 \leq 2405$。
+\end{itemize}
+
+\subsubsection{初始种群生成}
+
+初始种群的质量与多样性直接决定了进化算法的收敛速度和解的最终质量。为兼顾解的优质性与种群的多样性，本问采用混合初始化策略，初始种群由以下两部分构成：
+
+\begin{enumerate}
+    \item \textbf{贪心启发式个体}：使用8组不同权重组合的加权贪心算法生成8个初始解，每个解经过轻微扰动（即随机交换少量任务的区域或开工时刻）产生多个变体，共约40个个体。
+    \item \textbf{随机个体}：随机为每个任务从候选集中均匀采样，填充至种群规模 $N_{\text{pop}} = 80$。
+\end{enumerate}
+
+上述设计旨在平衡进化算法中两类核心且相互矛盾的需求：\textbf{开发}与\textbf{探索}。
+
+\textbf{贪心启发式个体承担开发的角色。}加权贪心算法虽然容易陷入局部最优，但能够快速生成一组\textbf{可行且合理}的调度方案。能够满足所有硬约束，且在特定权重偏好下表现出较低的成本、碳排放或时延。使用8组不同的权重组合能够使初始解分布在搜索空间的不同有利区域。而对这些解施加轻微扰动，一方面保留了“优质基因”，另一方面引入了细微变化，增强了局部多样性。若无此类高质量起点，算法需从完全随机的劣质解开始进化，可能需要数百代才能达到同等水平，严重拖慢收敛速度。
+
+\textbf{随机个体承担探索的角色。}贪心解尽管质量较高，但它们均基于某种确定的启发式规则生成，种群内部可能存在系统性偏差。若所有权重组合都偏向低成本，则所有贪心解都会倾向于将任务迁往电价低廉的区域，忽视了其他潜在优质区域。随机个体从候选集中均匀采样，不受任何偏见引导，可能出现在搜索空间的任意角落，包括贪心算法从未考虑过的区域。这些个体虽然目标值较差，但携带了贪心解不具备的“异类基因”。在后续进化中，通过交叉操作，这些异类基因可与贪心解的高质量基因重组，产生突破局部最优的新个体。若无随机个体，种群多样性过低，极易发生早熟收敛，使算法停滞于贪心解附近的局部Pareto前沿。
+
+本问使用这种方法生成初始种群，两种个体各约占种群的一半，形成互补格局。
+
+
+
+\subsubsection{适应度评价与约束处理}
+
+每个个体的适应度由其四个目标函数值 $F_{\text{cost}}, F_{\text{carbon}}, F_{\text{latency}}, F_{\text{renew}}$ 构成。对于违反硬约束（GPU容量、IT功率、时延、完成时限）的个体，采用罚函数法：将各约束违反量线性加权后加到所有目标函数上，使其在非支配排序中被劣化。本问将罚函数系数设置为足够大的常数，以确保可行解总是优于不可行解。
+
+\subsubsection{进化算子}
+
+进化算子是NSGA-II的核心驱动力，它们模拟自然界中生物的遗传与变异过程，引导种群逐步逼近Pareto最优前沿。本模型采用三种经典算子：锦标赛选择、模拟二进制交叉（SBX）和多项式变异，并针对整数编码的调度问题进行了适配。
+
+\paragraph{选择算子}
+采用锦标赛选择机制，锦标赛规模设为2，这样能够在选择压力与随机性之间取得良好平衡：规模过小（如1）会导致选择压力不足，进化缓慢；规模过大则会加剧早熟收敛风险。每次从当前种群中随机抽取2个个体，比较其非支配等级与拥挤度距离。选择规则为：优先选择非支配等级较低的个体；若等级相同，则选择拥挤度距离较大的个体。非支配等级保证了种群向Pareto前沿收敛的方向性，拥挤度距离则维护了解集在目标空间中的分布均匀性。
+
+\paragraph{交叉算子}
+采用模拟二进制交叉（SBX）算子，交叉概率设为 $p_c = 0.9$，分布指数 $\eta_c = 20$。SBX算子模拟二进制编码下单点交叉的效果，适用于实数编码或整数编码的基因重组。对于给定的两个父代个体 $p_1$ 和 $p_2$，SBX按如下方式生成两个子代 $c_1$ 和 $c_2$：
+
+\[
+\begin{aligned}
+\beta &= \begin{cases}
+(2u)^{\frac{1}{\eta_c+1}}, & u \leq 0.5,\\
+\left(\frac{1}{2(1-u)}\right)^{\frac{1}{\eta_c+1}}, & u > 0.5,
+\end{cases}\\
+c_1 &= 0.5\left[(1+\beta)p_1 + (1-\beta)p_2\right],\\
+c_2 &= 0.5\left[(1-\beta)p_1 + (1-\beta)p_2\right],
+\end{aligned}
+\]
+
+其中 $u \sim U(0,1)$ 为均匀随机数。交叉概率 $p_c=0.9$ 确保绝大多数父代对都进行基因重组，促进优良基因的传播。分布指数 $\eta_c=20$ 使子代倾向于分布在父代附近，兼顾局部精细搜索（开发）与适度探索（探索）。
+
+\paragraph{变异算子}
+采用多项式变异算子，变异概率设为 $p_m = 1 / |\mathcal{I}|$，其中 $|\mathcal{I}|$ 为任务总数，分布指数 $\eta_m = 20$。由于决策变量为整数编码，即每个基因位对应一个任务在候选区域与开工时刻组合中的索引，标准多项式变异作用于连续变量，因此将其改造为：以概率 $p_m$ 对每个基因位独立执行变异，若触发变异，则将该基因位的值重置为对应任务候选集中的另一个合法值，该值均匀随机选取。变异概率 $p_m = 1/|\mathcal{I}|$ 意味着每个个体平均仅有一个任务发生变异，既引入了必要的扰动以维持种群多样性，又避免了对优质解的过度破坏。同时分布指数 $\eta_m=20$ 控制变异幅度的偏好。较小的 $\eta_m$ 倾向于产生较大跳跃，增强探索；较大的 $\eta_m$ 则倾向于局部微调，增强开发。经实验验证，$\eta_m=20$ 在本问题中表现稳健。
+
+本模型采用三者协同机制，选择、交叉与变异三者构成闭环进化流程：
+\begin{enumerate}
+    \item 选择算子从当前种群中筛选出精英个体作为父代，推动种群向Pareto前沿收敛；
+    \item 交叉算子重组父代基因，产生子代，实现优良基因的组合创新；
+    \item 变异算子对子代进行随机扰动，引入全新基因，防止种群陷入局部最优。
+\end{enumerate}
+
+
+\subsubsection{算法流程}
+
+本问通过NSGA-II求解任务调度，算法流程如下图所示：
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.7\textwidth]{nsga.png}
+\caption{NSGA-II求解任务调度算法流程图}
+\label{fig:nsga}
+\end{figure}
+
+\subsubsection{参数设置}
+
+经过多次试验，最终采用的参数如表~\ref{tab:params}所示。
+
+\begin{table}[H]
+\centering
+\small
+\caption{NSGA-II 参数设置}
+\label{tab:params}
+\begin{tabular}{ll}
+\toprule
+参数 & 值 \\
+\midrule
+种群规模 $N$ & 80 \\
+最大进化代数 & 300 \\
+交叉概率 $p_c$ & 0.9 \\
+交叉分布指数 $\eta_c$ & 20 \\
+变异概率 $p_m$ & $1/|\mathcal{I}|$ \\
+变异分布指数 $\eta_m$ & 20 \\
+锦标赛选择规模 & 2 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{结果与分析}
+
+\subsubsection{对比基线设置}
+
+
+
+对比基线采用“本地最早开工”策略：所有任务优先在来源区域执行，实时任务立即开始，弹性任务在容量允许时按最早截止期排队,仅在本地区域不可行时迁移至时延最小的可行区域。
+
+
+
+\subsubsection{贪心调度结果分析}
+
+表~\ref{tab:greedy_comparison} 列出了八组不同权重组合下加权贪心调度算法得到的调度方案。
+\begin{table}[H]
+\centering
+\small
+\caption{不同权重组合下贪心调度方案的四项目标值}
+\label{tab:greedy_comparison}
+\begin{tabularx}{\textwidth}{
+  l
+  S[group-separator={}, table-format=9.0]
+  S[table-format=6.2]
+  S[table-format=4.1]
+  S[table-format=1.4]
+  S[table-format=5.0]
+}
+\toprule
+\textbf{方案} &
+\textbf{运行成本（元）} &
+\textbf{碳排放（tCO\(_2\)）} &
+\textbf{平均时延（ms）} &
+\textbf{新能源利用率}  \\
+\midrule
+greedy\_balanced & 383632923 & 340096.53 & 35.9 & 0.0932 \\
+greedy\_cost     & 383678282 & 340046.71 & 35.9 & 0.0932 \\
+greedy\_carbon   & 383668756 & 340527.62 & 35.9 & 0.0932  \\
+greedy\_renew    & 383645992 & 340127.60 & 35.9 & 0.0932  \\
+greedy\_latency  & 383633667 & 340102.61 & 35.9 & 0.0932 \\
+greedy\_cost2    & 383666402 & 340055.69 & 35.9 & 0.0932  \\
+greedy\_bal2     & 383514487 & 340039.88 & 35.9 & 0.0932  \\
+greedy\_mix      & 383632923 & 340096.53 & 35.9 & 0.0932  \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+观察可知，所有方案的四个目标值几乎完全相同：运行成本稳定在 $3.836\times10^8$ 元左右，碳排放约为 $3.401\times10^5$ tCO$_2$，平均网络时延均为 35.9 ms，新能源利用率均为 0.0932。这一现象表明，在当前数据集的约束条件下，贪心算法的搜索空间受到严重制约，不同权重导向的解迅速收敛到同一个可行区域的边界附近。换言之，无论权重如何侧重，贪心策略都无法突破容量瓶颈，只能在非常有限的可行解子集中选择，从而导致各方案高度相似。
+这也正是本问需要引入多目标进化算法（NSGA-II）的原因。通过全局搜索和种群多样性，有望找到在多个目标上均优于贪心解的非支配方案。
+
+\subsubsection{多维度性能横向对比}
+表~\ref{tab:results} 统计了各调度方案在四项核心指标上的数值。
+
+\begin{table}[H]
+\centering
+\caption{各调度策略性能对比}
+\label{tab:results}
+\begin{tabular}{l
+  S[table-format=9.0]
+  S[table-format=6.0]
+  S[table-format=5.2]
+  S[table-format=1.3]
+  S[table-format=5.0]
+}
+\toprule
+\textbf{方法} & \textbf{成本（元）} & \textbf{碳排放（tCO\textsubscript{2}）} & \textbf{平均延迟（ms）} & \textbf{新能源利用率}  \\
+\midrule
+greedy\_balanced   & 383632923 & 340097 & 35.88 & 0.093  \\
+greedy\_cost       & 383678282 & 340047 & 35.86 & 0.093  \\
+greedy\_carbon     & 383668756 & 340528 & 35.89 & 0.093 \\
+greedy\_renew      & 383645992 & 340128 & 35.87 & 0.093 \\
+greedy\_latency    & 383633667 & 340103 & 35.88 & 0.093 \\
+greedy\_cost2      & 383666402 & 340056 & 35.86 & 0.093  \\
+greedy\_bal2       & 383514487 & 340040 & 35.88 & 0.093  \\
+greedy\_mix        & 383632923 & 340097 & 35.88 & 0.093  \\
+nsga2\_knee        & 539896087 & 437199 & 38.16 & 0.095 \\
+nsga2\_min\_cost   & 398419763 & 345364 & 36.10 & 0.093 \\
+nsga2\_min\_carbon & 398854917 & 345802 & 36.09 & 0.093 \\
+nsga2\_min\_latency& 527945304 & 426711 & 38.03 & 0.095 \\
+nsga2\_max\_renew  & 533366736 & 431712 & 38.11 & 0.095 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{目标函数归一化处理}
+
+由于四个优化目标在物理含义与数值量级上存在显著差异（见表~\ref{tab:results}），
+若直接代入 NSGA-II 计算拥挤度与 Pareto 支配关系，
+\textbf{量级较大的目标（如运行成本、碳排放）将主导搜索方向}，
+而量级较小的目标（如新能源利用率）几乎不参与比较，导致算法退化为单目标优化。
+
+为此，本文对所有目标函数值进行\textbf{全局 min-max 归一化}，将其统一映射到 $[0,1]$ 区间：
+
+\begin{equation}
+  f_i^{\mathrm{norm}} = \frac{f_i - f_i^{\mathrm{gmin}}}{f_i^{\mathrm{gmax}} - f_i^{\mathrm{gmin}}},\quad i = 1,2,3,4
+  \label{eq:minmax}
+\end{equation}
+
+\noindent
+其中 $f_i^{\mathrm{gmin}}$ 与 $f_i^{\mathrm{gmax}}$ 分别为该目标在\textbf{所有待比较调度方案}
+（包括 NSGA-II 所得 Pareto 最优解与全部贪心启发式方案）上的全局最小值与最大值。
+具体而言，归一化基准不再仅依赖 Pareto 前沿解的极值，而是以所有方案在各目标维度上的
+实际最优值与最差值作为映射端点，从而保证每个方案的归一化结果均严格落于 $[0,1]$ 区间内。
+当某一方案在某目标上优于所有 Pareto 解时，其归一化值被截断为 $0$（代表该目标上的全局最优），
+反之则截断为 $1$（代表全局最差）。
+
+需要特别说明的是，归一化仅作用于\textbf{算法搜索过程}与\textbf{结果可视化}两个环节，
+论文正文具体结果及表格中报告的所有具体数值仍使用\textbf{原始物理量纲}，以保证可解释性。
+
+
+
+
+
+\subsubsection{Pareto 最优前沿与解集分布分析}
+
+
+为了直观展示算法在多目标优化中的权衡效果与解集分布特征，图~\ref{fig:pareto_front} 绘制了 NSGA-II 算法得到的 Pareto 前沿。
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{fig0_pareto_overview.png}
+    \caption{NSGA-II Pareto 前沿}
+    \label{fig:pareto_front}
+\end{figure}
+
+左上子图（a）展示了运行成本与碳排放和平均网络时延三目标之间的关系以及归一化运行成本与归一化碳排放之间的内在联系。由此我们可以直观得出关于调度方案的初步结论：在合理的调度策略下，\textbf{低运行成本与低碳排放这两个目标可以实现同步优化。然而，该状态下系统的平均网络时延水平较高；}反之，\textbf{若以降低平均网络时延为主要优化目标，则将不可避免地导致运行成本与碳排放水平的同步升高。}此外，由于图中的散点并没有出现明显的“拐点”或分离现象，说明对于该特定环境配置，\textbf{成本与碳排放之间存在较强的线性耦合关系，}需要同时考虑两者的联动效应。
+
+右上子图（b)揭示了运行成本与平均时延之间的复杂非线性关系，其中颜色深浅代表了碳排放的大小。图（b)的分布形态同样表明，算法在探索解空间时追求低时延通常伴随较高成本和碳排；牺牲时延可以换取低运行成本与低碳排放。
+
+左下子图（c) 展示了碳排放与新能源利用率的关联，其中颜色代表了运行成本。图中数据点明显分裂为左右两个独立的簇。左簇的新能源利用率较低，而右簇的利用率有所提升。\textbf{而最优的新能源利用率则会带来较高成本和碳排放。}
+
+右下角的平行坐标图通过折线交叉的方式，每一条折线代表一个可行解，综合展现了各个解在四个目标上的表现。可以直观地观察到，\textbf{代表高成本的线条往往在碳排维度上也呈现上升趋势。同时可以观察到，随着运行成本和碳排放的增加，新能源利用率呈现出明显的上升趋势且平均网络时延水平逐渐降低。}该图有效地捕捉了帕累托解集中的多样性。
+
+为了进一步评估不同调度方案在多维度指标上的综合表现，图~\ref{fig:radar} 采用雷达图对各方案的归一化性能进行了可视化。图中各轴代表不同的优化目标，数值越靠近圆心代表性能越好（即成本越低、时延越小等）。在视乎各目标重要性等同时，可以看出贪婪算法的解greedy\_bal2面积最小，即该调度方案表现最好。该调度方案的具体结果为：成本383514487元，碳排放量340040$tCO_2$, 平均时延35.88$ms$, 新能源利用率0.093。虽然在某些单一指标上不是极限最优，但其形成的多边形面积最小，表明其在多个相互冲突的目标之间找到了更好的平衡。
+
+\begin{figure}[H]
+    \centering
+     \includegraphics[width=0.8\textwidth]{fig2_radar_compare.png}
+    \caption{各调度方案多目标雷达图（归一化，外圈=更差）}
+    \label{fig:radar}
+\end{figure}
+
+
+
+\section{问题三：储能协同优化模型构建与策略分析}
+\FloatBarrier
+\subsection{问题分析}
+问题三要求在在给定任务调度和逐时负荷的基础上，建立储能协同优化模型，设
+计储能充放电策略。故本问使用由第二问 greedy\_bal2 策略生成的给定的各区域的任务调度结果，每个任务的开始时间、结束时间、IT 功率和设施功率均已确定。在此基础上，为各区域配置储能系统，设计最优充放电策略。同时，评估储能系统对运行成本、碳排放、区域峰值净购电功率和负荷波动程度的改善作用。根据题目设定，不建模跨区域线路潮流，因此各区域的电力与储能优化解耦，可按区域独立建立模型进行求解。
+
+\subsection{储能荷电状态数据的校验与修正}
+
+为确保储能系统荷电状态（SOC）数据的自洽性与准确性，本问对所有六个区域（Region A--F）的SOC时序数据进行了递推校验。SOC的变化遵循问题提供的如下递推关系：
+
+\begin{equation}
+\mathrm{SOC}(t) = 
+\begin{cases}
+\mathrm{InitialSOC} + P_{\mathrm{ch}}(t) \cdot \eta_{\mathrm{ch}} - \dfrac{P_{\mathrm{dis}}(t)}{\eta_{\mathrm{dis}}}, & t=0,\\[8pt]
+\mathrm{SOC}(t-1) + P_{\mathrm{ch}}(t) \cdot \eta_{\mathrm{ch}} - \dfrac{P_{\mathrm{dis}}(t)}{\eta_{\mathrm{dis}}}, & t \geq 1,
+\end{cases}
+\label{eq:soc_recurrence}
+\end{equation}
+
+其中 $P_{\mathrm{ch}}$ 和 $P_{\mathrm{dis}}$ 分别为各小时的充电功率与放电功率（单位：MW），$\eta_{\mathrm{ch}}$ 和 $\eta_{\mathrm{dis}}$ 分别为充电效率与放电效率。不同区域的效率取值由问题数据提供。初始荷电状态 $\mathrm{InitialSOC}$ 定义为第0小时开始前的SOC值，而 $\mathrm{SOC}(t)$ 为第 $t$ 小时结束时的SOC值。
+
+校验过程分为两步进行。首先，将数据集中的原始 $\mathrm{SOC}_{\mathrm{MWh}}(t)$ 视为正确基准，利用式~\eqref{eq:soc_recurrence} 反向推导每个时间步所隐含的初始荷电状态：
+
+\begin{equation}
+\mathrm{InitialSOC}_{\mathrm{implied}}(t) = \mathrm{SOC}_{\mathrm{MWh}}(t) - \sum_{k=0}^{t} \left( P_{\mathrm{ch}}(k) \cdot \eta_{\mathrm{ch}} - \frac{P_{\mathrm{dis}}(k)}{\eta_{\mathrm{dis}}} \right).
+\label{eq:backward}
+\end{equation}
+
+由于随机测量误差或数值舍入的影响，不同时刻推算出的 $\mathrm{InitialSOC}_{\mathrm{implied}}(t)$ 可能存在微小波动。为此，取所有时刻推算值的中位数作为该区域修正后的$\mathrm{InitialSOC}_{\mathrm{corr}}$。随后，以 $\mathrm{InitialSOC}_{\mathrm{corr}}$ 为起点，按照正向递推公式~\eqref{eq:soc_recurrence} 重新计算完整的SOC序列 $\mathrm{SOC}_{\mathrm{check}}(t)$，并与原始SOC值进行比较，定义绝对偏差 $\Delta(t) = |\mathrm{SOC}_{\mathrm{MWh}}(t) - \mathrm{SOC}_{\mathrm{check}}(t)|$。
+
+校验结果表明，Region A、B、C、D、F五个区域的原始初始SOC与修正值之间的差异均在浮点数精度范围内（最大绝对偏差小于0.005~MWh），且修正后正向递推得到的SOC序列与原始数据高度吻合，最大残差不超过0.002~MWh。这些微小偏差源于充放电功率与效率乘积过程中的四舍五入累积效应，不影响数据的使用。
+
+然而，Region E表现出明显的系统性偏差。该区域原始记录的初始SOC为370~MWh，但通过式~\eqref{eq:backward} 反向推导得到的中位数修正值为369~MWh，二者相差约1~MWh。进一步分析发现，若采用原始的370~MWh作为起点，则整个168小时内的SOC序列均比递推公式计算值低约1~MWh，最大绝对偏差达到1.004~MWh。而采用修正后的369~MWh重新递推后，最大绝对偏差骤降至0.002~MWh，表明原始数据中Region E的初始SOC记录存在笔误或录入错误。因此，在后续分析中，我们将Region E的初始SOC修正为369~MWh，并以此为基础重新生成该区域的全部SOC时序数据。
+
+最终，经过校验与修正后的数据集在物理自洽性上得到了显著提升，为后续的优化调度与运行分析提供了可靠的基础。
+\subsection{目标函数}
+针对题意要求，构建包含成本、碳排、峰值与波动的多目标评价体系，并采用加权法转化为单目标函数。
+
+\textbf{1. 最小化运行成本 ($F_{cost}$)}：
+成本由购电支出与新能源外送收益组成。
+$$
+F_{cost} = \sum_{t \in T} \left( P_{t}^{buy} P_{t}^{price} - P_{t}^{exp} P_{t}^{sell} \right)
+$$
+
+\textbf{2. 最小化碳排放量 ($F_{carbon}$)}：
+碳排放仅来自于向主电网的购电量。
+$$
+F_{carbon} = \sum_{t \in T} \left( P_{t}^{buy} C_t \right)
+$$
+
+\textbf{3. 最小化峰值净购电功率 ($F_{peak}$)}：
+引入辅助变量 $P_{max}^{net}$ 约束区域最大净购电峰值。
+$$
+F_{peak} = P_{max}^{net}, \quad \text{其中 } P_{t}^{buy} - P_{t}^{exp} \le P_{max}^{net}, \forall t \in T
+$$
+
+\textbf{4. 最小化负荷波动程度 ($F_{fluc}$)}：
+采用净购电功率的方差或相邻时段的爬坡差绝对值作为波动衡量指标（此处采用二次型差分以平抑爬坡率）。
+$$
+F_{fluc} = \sum_{t=1}^{T} (P_{t}^{buy} - P_{t-1}^{buy})^2
+$$
+
+综合目标函数：
+$$
+\min J = \omega_1 \bar{F}_{cost} + \omega_2 \bar{F}_{carbon} + \omega_3 \bar{F}_{peak} + \omega_4 \bar{F}_{fluc}
+$$
+
+\subsection{约束条件}
+\textbf{1. 功率平衡约束：}
+节点注入功率（购电、可用新能源、储能放电）必须等于节点流出功率（总负荷、储能充电、售电/外送、弃风弃光）。设弃风弃光为 $P_t^{curtail} \ge 0$。
+$$
+P_{t}^{buy} + P_{t}^{re\_avail} + P_{t}^{dis} = P_{t}^{load} + P_{t}^{ch} + P_{t}^{exp} + P_{t}^{curtail}, \quad \forall t \in T
+$$
+
+\textbf{2. 储能动态方程与容量约束：}
+根据时段初与时段末的能量守恒建立递推关系。
+$$
+S_t = S_{t-1} + \eta_c P_{t}^{ch} - \frac{P_{t}^{dis}}{\eta_d}, \quad \forall t \in T
+$$
+$$
+S^{min} \le S_t \le S^{max}, \quad \forall t \in T
+$$
+
+\textbf{3. 充放电功率约束：}
+$$
+0 \le P_{t}^{ch} \le P_{max}^{ch}, \quad 0 \le P_{t}^{dis} \le P_{max}^{dis}, \quad \forall t \in T
+$$
+引入 0-1 变量避免同时充放电，或利用电价/损耗天然的互斥性使得最优解自动满足。
+
+\textbf{4. 终端状态约束：}
+优化结束时，第 2406 小时的储能 SOC 必须不低于初始给定状态。
+$$
+S_{2406} \ge S_0 = InitialSOC
+$$
+
+\subsection{求解算法}
+由于问题三的负荷序列已知，且模型包含线性和二次项（爬坡惩罚），可直接将其建模为混合整数二次规划 (MIQP) 问题或二次规划 (QP) 问题。对六个区域分别构建上述数学模型，采用 Gurobi、CPLEX 或开源的 HiGHS/CBC 求解器即可在极短时间内获取每个区域长达 2407 小时的全局最优充放电策略。随后，通过计算策略实施前后的 $F_{cost}, F_{carbon}$ 等指标变化比例，定量评估储能系统的综合效益。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\section{问题四：多区域算储电协同优化模型的构建与求解}
+\FloatBarrier
+
+\subsection{问题分析}
+问题四要求在多区域智算中心网络上，对计算任务调度、储能运行与电网购售电进行协同优化，并同时关注运行成本、碳排放、服务质量、新能源消纳与购电峰值等目标。与前几问相比，本问的决策空间由“单阶段算力调度”扩展为“算力—储能—电力”耦合；评价由单一主指标扩展为多目标权衡；情景维度增加碳预算、电价机制与新能源出力扰动。附件中各区域逐时 $\mathrm{AvailableRenewable}$ 完全相同；若按六区独立写入能量平衡，将六倍重复计算系统新能源并导致近零购电的虚假解。因此，阶段二采用各区域基准可消纳上界
+\begin{equation}
+\overline{R}_{r,t}
+=
+\min\bigl\{
+U^{\mathrm{base}}_{r,t}+C^{\mathrm{RE,base}}_{r,t}+S^{\mathrm{base}}_{r,t},\;
+R^{\mathrm{raw}}_{r,t}
+\bigr\},
+\end{equation}
+其中 $U^{\mathrm{base}},C^{\mathrm{RE,base}},S^{\mathrm{base}}$ 分别为附件基准方案中的新能源直供、新能源充电与售电分量，$R^{\mathrm{raw}}$ 为附件原始可用出力，利用率指标仍以附件 $\sum R^{\mathrm{raw}}$ 为分母报告。
+在上述边界下，若将全部任务起止、机房选择、储能充放电与购售电纳入单一大规模混合整数规划，变量与耦合约束规模过大，且碳、峰值等目标与成本目标量纲不一，直接加权难以解释。为此，本文采用\textbf{两阶段协同优化}：阶段一在\textbf{硬资源与服务质量约束下}，完成任务的时空落点，形成各区域 AI 负荷轨迹；阶段二在\textbf{负荷固定后}，对各区域独立求解储—电线性规划，主目标最小化运行成本
+\begin{equation}
+\min\;
+C
+=
+\sum_{r\in\mathcal{R}}
+\sum_{t\in\mathcal{T}}
+\bigl(
+p^{\mathrm{buy}}_{r,t}G_{r,t}
+-
+p^{\mathrm{sell}}_{r,t}S_{r,t}
+\bigr).
+\end{equation}
+\textbf{碳排放、峰值净购电与新能源利用率不进入主目标的加权和}，而通过 $\varepsilon$-约束或情景比较进入阶段二；当碳预算在当前排程下不可达时，再反馈调整阶段一的碳感知权重。该分解保留了题目要求的物理耦合，同时使 5 万任务规模下的求解可操作、可复核。
+\subsection{阶段一：碳电价感知的任务调度模型}
+记任务集合为 $\mathcal{J}$，区域集合为 $\mathcal{R}=\{A,\ldots,F\}$。对任务 $j\in\mathcal{J}$，决策为其执行区域 $r_j\in\mathcal{R}_j$ 与整数开始时刻 $s_j$，其中 $\mathcal{R}_j$ 为满足网络时延上限的可行机房集合。设任务 GPU 需求为 $g_j$、持续时间为 $d_j$（分钟）、单位 GPU 功率为 $\pi_j$，则在小时 $t$ 的分钟重叠比例为 $q_{j,t}(s_j)\in[0,1]$，对应增量 GPU 占用与 AI 功率为
+\begin{equation}
+\Delta\mathrm{GPU}_{j,r,t}
+=
+g_j q_{j,t}(s_j),\qquad
+\Delta P^{\mathrm{AI}}_{j,r,t}
+=
+g_j\pi_j q_{j,t}(s_j).
+\end{equation}
+\textbf{硬约束}包括：（i）实时任务 $s_j=a_j$，非实时任务 $a_j\le s_j$ 且完工时刻不超过截止时刻与终端时刻；（ii）$r_j\in\mathcal{R}_j$；（iii）各区各时 GPU 容量、AI+NonAI 的 IT 功率上限，以及经 PUE 后的设施功率上限。凡违反硬约束的候选一律剔除。
+由于精确联合整数规划在全量任务上难以在竞赛时限内稳定求解，阶段一采用动态贪心：先按“实时优先—可行区少—松弛紧—GPU·时长大”排序，再对每个任务在可行 $(r,s)$ 上最小化代理代价。主推联合策略的评分为
+\begin{equation}
+\begin{aligned}
+\Phi(j,r,s)
+&=
+\frac{1}{1000}E^{\mathrm{price}}_{j,r,s}
++
+\lambda E^{\mathrm{carbon}}_{j,r,s}
++
+0.05\,E^{\mathrm{CI}}_{j,r,s}
+\\
+&\quad
++
+w_w(s-a_j)
++
+0.05\,L_{o_j,r}
++
+w_m\mathbb{I}\{r\neq o_j\}
++
+20\,\rho^{\mathrm{peak}}_{j,r,s},
+\end{aligned}
+\end{equation}
+其中 $o_j$ 为任务源区域，$L_{o_j,r}$ 为网络时延，$\rho^{\mathrm{peak}}$ 为放置后的 GPU 峰值占用率代理；$E^{\mathrm{price}}$ 为设施电能量与分时电价的内积。碳相关项采用\textbf{计及剩余新能源}的代理：先计算该区该时段在已有 NonAI 与已放置 AI 之后的剩余可消纳新能源 $\widetilde{R}_{r,t}$，仅对超出部分计碳，
+\begin{equation}
+E^{\mathrm{carbon}}_{j,r,s}
+=
+\sum_{t}
+\max\bigl\{
+\Delta P^{\mathrm{AI}}_{j,r,t}\cdot\mathrm{PUE}_r-\widetilde{R}_{r,t},\,0
+\bigr\}
+\cdot
+\mathrm{CI}_{r,t},
+\end{equation}
+并以设施功率与碳强度的内积 $E^{\mathrm{CI}}$ 作为弱偏好项。默认 $\lambda=80$；在碳 $\varepsilon$-约束收紧且需重调度时增大 $\lambda$，并相应降低等待与迁移权重，以使负荷更易迁向低购电碳区时。对比策略 $\texttt{local\_first}$、$\texttt{lowest\_price}$、$\texttt{lowest\_carbon}$ 仅改变 $\Phi$ 的主导项，硬约束集保持不变。
+阶段一输出各任务的 $(r_j,s_j)$ 及区域 AI 功率轨迹 $P^{\mathrm{AI}}_{r,t}$。区域总设施负荷
+\begin{equation}
+L_{r,t}
+=
+\bigl(P^{\mathrm{NonAI}}_{r,t}+P^{\mathrm{AI}}_{r,t}\bigr)\,\mathrm{PUE}_r
+\end{equation}
+作为阶段二的外生输入。
+
+\subsection{阶段二：区域储电联合优化模型}
+
+固定 $\{L_{r,t}\}$ 后，各区域 $r$ 在时段 $\mathcal{T}$ 上独立求解储—电线性规划。决策变量为购电 $G_{r,t}$、售电 $S_{r,t}$、充电 $C_{r,t}$、放电 $D_{r,t}$、弃光 $U_{r,t}$ 与荷电状态 $\mathrm{SOC}_{r,t}$。主问题为最小化区域运行成本
+\begin{equation}
+\min\;
+\sum_{t\in\mathcal{T}}
+\bigl(
+p^{\mathrm{buy}}_{r,t}G_{r,t}
+-
+p^{\mathrm{sell}}_{r,t}S_{r,t}
+\bigr).
+\end{equation}
+系统总成本为各区之和 $C=\sum_r C_r$。
+
+附件口径的能量平衡为
+\begin{equation}
+G_{r,t}+\overline{R}_{r,t}+D_{r,t}
+=
+L_{r,t}+C_{r,t}+S_{r,t}+U_{r,t},
+\qquad
+\forall t,
+\end{equation}
+并满足功率上下界
+\begin{equation}
+\begin{aligned}
+0&\le G_{r,t}\le G^{\max}_r,
+&
+0&\le S_{r,t}\le \min\{S^{\max}_r,S^{\mathrm{limit}}_r\},
+\\
+0&\le C_{r,t}\le C^{\max}_r,
+&
+0&\le D_{r,t}\le D^{\max}_r,
+&
+0&\le U_{r,t}\le \overline{R}_{r,t},
+\end{aligned}
+\end{equation}
+以及储能动态与终端约束
+\begin{equation}
+\begin{aligned}
+\mathrm{SOC}_{r,0}
+&=
+\mathrm{SOC}^{\mathrm{init}}_r+\eta^c_r C_{r,0}-D_{r,0}/\eta^d_r,
+\\
+\mathrm{SOC}_{r,t}
+&=
+\mathrm{SOC}_{r,t-1}+\eta^c_r C_{r,t}-D_{r,t}/\eta^d_r,
+\\
+\mathrm{SOC}^{\min}_r
+&\le
+\mathrm{SOC}_{r,t}
+\le
+\mathrm{SOC}^{\max}_r,
+\qquad
+\mathrm{SOC}_{r,|\mathcal{T}|-1}
+\ge
+\mathrm{SOC}^{\mathrm{init}}_r.
+\end{aligned}
+\end{equation}
+系统碳排放定义为购电碳强度加权：
+\begin{equation}
+E
+=
+\sum_{r}\sum_{t}
+\mathrm{CI}_{r,t}\,G_{r,t}.
+\end{equation}
+新能源消纳量取 $\sum_{r,t}(\overline{R}_{r,t}-U_{r,t})$；正式利用率以附件原始可用出力 $\sum R^{\mathrm{raw}}$ 为分母。阶段二在基准设定下仅最小化成本；碳预算 $E\le\varepsilon$、峰值净购电上限、利用率下界等作为可选约束，在下一小节的情景中按需启用。上述 LP 由 HiGHS 求解。
+
+\subsection{多情景设计与评价指标}
+
+进一步为分析多情景波动下的策略，本文在联合策略基线（阶段一 $\texttt{joint}$+阶段二成本最优）之上，设置三类扰动情景：\textbf{碳约束情景；电价机制情景；新能源波动情景}
+
+\subsubsection{碳约束情景}
+
+以基线排放 $E_0$ 为参照，考察硬 $\varepsilon$-约束
+\begin{equation}
+\min\; C
+\quad
+\mathrm{s.t.}
+\quad
+E\le\varepsilon.
+\end{equation}
+绝对比例情景取 $\varepsilon\in\{1.0,0.9,0.8,0.7\}E_0$。求解时碳约束不可静默丢弃：先对各区求最小碳 $E^{\min}_r$，若 $\sum_r E^{\min}_r>\varepsilon$ 则当前排程不可达；否则将松弛 $\varepsilon-\sum E^{\min}_r$ 按各区头寸比例分配为区域预算并重解成本 LP。不可达时提高阶段一碳权重 $\lambda$ 重调度后再试。另计算仅 NonAI 负荷下的系统碳下界 $E^{\mathrm{NonAI}}$：若 $\varepsilon<E^{\mathrm{NonAI}}$，则物理不可行，直接标记并报告原因，而不输出“假满足”解。由于 $E^{\mathrm{NonAI}}$ 已接近 $0.9E_0$ 量级，绝对比例 $0.8E_0$、$0.7E_0$ 通常不可行。为在可行域内展示成本—碳权衡，另设间隙情景
+\begin{equation}
+\varepsilon(\alpha)=E^{\mathrm{NonAI}}+\alpha\bigl(E_0-E^{\mathrm{NonAI}}\bigr),
+\qquad
+\alpha\in\{0.75,0.50,0.25\}.
+\end{equation}
+
+\subsubsection{电价机制情景}
+
+固定新能源口径，改变购售电价格信号并重新执行两阶段，比较机制对成本、碳排与负荷时空分布的影响。三种机制为：
+\begin{enumerate}
+\item \textbf{峰谷拉大}：以各区小时均价为中心，将购电价偏离放大为 $1.6$ 倍并设下限，售电价上浮 $10\%$，强化分时套利动机；
+\item \textbf{平价}：各区购电价取该区时段均值并全时段拉平，削弱峰谷差；
+\item \textbf{碳—电联动}：令 $p^{\mathrm{buy}}_{r,t}\leftarrow p^{\mathrm{buy}}_{r,t}+\kappa\,\mathrm{CI}_{r,t}$（取 $\kappa=80$\,CNY/tCO$_2$），高碳时段购电更贵。
+\end{enumerate}
+电价变化同时进入阶段一代理分与阶段二目标，从而同时改变任务落点与储—电运行。
+
+\subsubsection{新能源波动情景}
+
+在基线排程上，将\textbf{可消纳上界与原始可用出力同乘扰动因子 $\gamma\in\{0.8,1.2\}$，}对应新能源偏紧与偏松。偏紧情景考察购电成本与碳排上升、峰值承压；偏松情景在阶段二附加利用率下界（弃光不超过可消纳上界的 $10\%$），考察额外新能源能否被负荷与储能有效消纳。该类情景不强制重调度任务，以分离“出力波动”与“算力重分布”的效应。
+
+\subsection{数值结果与分析}
+
+全量实验调度 \(5\times 10^4\) 个任务。结果按逻辑分两步给出：先比较阶段一策略并展示推荐方案的运行形态，再在联合基线上展开碳、电价与新能源三类情景波动分析。
+
+\subsubsection{基线策略比较与推荐方案}
+
+四种阶段一策略在相同阶段二设定下的结果见图~\ref{fig:q4-baseline} 与表~\ref{tab:q4-baseline}。图~\ref{fig:q4-baseline}(a)(b) 显示：\(\texttt{lowest\_price}\) 成本最低，但平均等待高达 \(77.2\)\,h，服务质量不可接受；\(\texttt{local\_first}\) 等待为 \(0\)，但成本与碳排均为最差；\(\texttt{lowest\_carbon}\) 碳略低于联合策略，却以 \(32.8\)\,h 等待为代价。联合策略 \(\texttt{joint}\) 在成本 \(1.632\times 10^9\)\,CNY、碳排 \(1.612\times 10^6\)\,tCO\(_2\) 的同时，将平均等待压至 \(0.27\)\,h、平均时延 \(25.9\)\,ms，并通过全部资源与截止硬约束，故作为推荐基线。
+
+相对附件原始 \(\mathrm{AvailableRenewable}\)（六区加总），推荐方案新能源利用率约为 \(32.9\%\)；该比值受附件六区重复可用出力口径影响，不等于“可消纳上界已用尽”。联合基线下可消纳上界几乎被填满，系统峰值净购电之和约 \(2731\)\,MW。图~\ref{fig:q4-baseline}(c)(d) 进一步给出推荐方案的电力侧形态：高碳区更多依赖购电，低碳高新能源区（如 D/E/F）购售与储能调节更活跃，SOC 呈持续峰谷套利。
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.92\textwidth]{figures/fig_q4_baseline_panel.png}
+  \caption{基线策略比较与推荐方案。（a）四种策略的成本与碳排放；（b）四种策略的平均等待与网络时延；（c）推荐方案 \(\texttt{joint}\) 的六区净购电；（d）推荐方案的六区储能 SOC。}
+  \label{fig:q4-baseline}
+\end{figure}
+
+\begin{table}[H]
+  \centering
+  \caption{阶段一策略比较（阶段二均为成本最优储—电 LP）}
+  \label{tab:q4-baseline}
+  \small
+  \begin{tabular}{lcccccc}
+    \hline
+    策略 & 成本/$10^9$ & 碳/$10^6$ & 等待/h & 时延/ms & 峰值净购电/MW & 硬约束 \\
+    \hline
+    local\_first & 1.706 & 1.741 & 0.000 & 5.06 & 2670 & 通过 \\
+    lowest\_price & 1.607 & 1.684 & 77.167 & 28.09 & 2800 & 通过 \\
+    lowest\_carbon & 1.632 & 1.616 & 32.789 & 28.67 & 2732 & 通过 \\
+    joint（推荐） & 1.632 & 1.612 & 0.272 & 25.89 & 2731 & 通过 \\
+    \hline
+  \end{tabular}
+\end{table}
+
+\subsubsection{三类情景波动分析}
+
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.90\textwidth]{figures/fig_q4_scenarios_panel.png}
+  \caption{三类情景波动分析结果。（a）碳约束情景的成本—碳权衡（叉号表示 \(\varepsilon\) 不可行）；（b）电价机制、新能源波动及可行碳间隙情景的成本与排放对比。}
+  \label{fig:q4-scenarios}
+\end{figure}
+\FloatBarrier
+
+\begin{table}[H]
+  \centering
+  \small
+  \caption{多情景关键指标（相对联合基线）}
+  \label{tab:q4-scenarios}
+  \small
+  \setlength{\tabcolsep}{3.5pt}
+  \begin{tabular}{llccccc}
+    \hline
+    类别 & 情景 & 成本/$10^9$ & 碳/$10^6$ & 预算/$10^6$ & 等待/h & 可行性 \\
+    \hline
+    基线 & joint & 1.632 & 1.612 & --- & 0.272 & 是 \\
+    \hline
+    \multirow{5}{*}{碳约束}
+      & 碳 \(100\%E_0\) & 1.632 & 1.612 & 1.612 & 0.272 & 是 \\
+      & 碳 \(90\%E_0\) & 1.719 & 1.519 & 1.451 & 5.402 & 否 \\
+      & 碳 \(80\%/70\%E_0\) & 1.719 & 1.519 & 1.289/1.128 & 6.289 & 否 \\
+      & 碳间隙 \(75\%\) & 1.649 & 1.571 & 1.571 & 0.272 & 是 \\
+      & 碳间隙 \(50\%\) & 1.693 & 1.530 & 1.530 & 0.272 & 是 \\
+    \hline
+    \multirow{3}{*}{电价}
+      & 峰谷拉大 & 1.508 & 1.731 & --- & 0.270 & 是 \\
+      & 平价 & 1.766 & 1.599 & --- & 0.269 & 是 \\
+      & 碳—电联动 & 1.760 & 1.598 & --- & 0.274 & 是 \\
+    \hline
+    \multirow{2}{*}{新能源}
+      & \(\gamma=0.8\) & 1.933 & 1.834 & --- & 0.272 & 是 \\
+      & \(\gamma=1.2\) & 1.347 & 1.440 & --- & 0.272 & 是 \\
+    \hline
+  \end{tabular}
+\end{table}
+
+\begin{itemize}
+  \item \textbf{碳约束情景.}
+  以基线排放 \(E_0=1.612\times 10^6\)\,tCO\(_2\) 为参照，NonAI 碳下界约 \(E^{\mathrm{NonAI}}=1.449\times 10^6\)\,tCO\(_2\)。\(\varepsilon=E_0\)（碳 \(100\%\)）时约束不收紧，结果与联合基线一致；绝对比例 \(\varepsilon\in\{0.9,0.8,0.7\}E_0\) 低于或贴近物理/排程下界，硬约束判定为\textbf{不可行}，仅返回尽力降碳运行点（约 \(1.519\times 10^6\)\,tCO\(_2\)）而不宣称满足名义预算。可行间隙情景呈现标准 \(\varepsilon\)-约束形态：\(\alpha=0.75\) 时排放贴边 \(1.571\times 10^6\)、成本 \(1.649\times 10^9\)；\(\alpha=0.50\) 时排放 \(1.530\times 10^6\)、成本 \(1.693\times 10^9\)；\(\alpha=0.25\) 仍不可行。图~\ref{fig:q4-scenarios}(a) 中可行点随碳下降而成本上升，与 \(\min C\ \mathrm{s.t.}\ E\le\varepsilon\) 一致。
+
+  \item \textbf{电价机制情景.}
+  峰谷拉大后成本降至 \(1.508\times 10^9\)（约降 \(7.6\%\)），碳升至 \(1.731\times 10^6\)，表明更强分时价差在推动套利的同时可能增加高碳时段购电；平价使成本升至 \(1.766\times 10^9\)、碳约 \(1.599\times 10^6\)，峰值净购电之和降至约 \(2095\)\,MW，购电过程更平滑；碳—电联动下成本 \(1.760\times 10^9\)、碳约 \(1.598\times 10^6\)，高碳时段购电被价格信号抑制。三类机制下平均等待仍约 \(0.27\)\,h，服务质量保持稳定。见图~\ref{fig:q4-scenarios}(b)。
+
+  \item \textbf{新能源波动情景.}
+  偏紧（\(\gamma=0.8\)）时成本升至 \(1.933\times 10^9\)、碳升至 \(1.834\times 10^6\)，峰值净购电触及上限合计 \(2800\)\,MW，系统承压显著；偏松（\(\gamma=1.2\)）时成本降至 \(1.347\times 10^9\)、碳降至 \(1.440\times 10^6\)，为各情景中成本与碳较优的组合之一。偏松情景附加利用率下界后仍可行，说明额外可消纳出力可被负荷与储能吸收；在既定算力落点下，新能源丰度对成本与排放具有一阶影响。见图~\ref{fig:q4-scenarios}(b)。
+\end{itemize}
+
+综合来看：联合两阶段方案在成本、碳与等待之间取得可接受折中；碳硬约束在可行域内给出贴边且成本递增的权衡，对低于 NonAI 下界的名义比例则诚实报不可行；电价机制主要改形成本—碳与峰值形态；新能源丰度则同时主导成本与排放的大幅波动。
+
+\section{模型的评价与推广}
+
+\textbf{\qquad 模型的优点：}问题一基于数据诊断建立复合泊松短时预测与字典序/$\varepsilon$-约束算力调度模型，在硬约束零违规前提下实现近似零等待与峰值削峰；问题二构建碳感知多目标调度，并结合贪心与 NSGA-II 给出成本、碳排、时延与新能源利用的权衡解集；问题三在给定负荷下建立区域储能协同优化，完成 SOC 校验修正并以连续优化得到充放电策略；问题四进一步形成算力—储能—电力两阶段协同框架，以碳电价感知调度生成负荷、以储电 LP 最小化运行成本，并用 $\varepsilon$-约束与碳/电价/新能源情景刻画可解释权衡。整体上，模型在预测可解释性、调度可行性与大规模可求解性之间取得了较好平衡。
+
+\textbf{\qquad 模型的缺点：}原始附件中 SOC 递推与新能源可用出力等字段存在口径不一致或跨区重复等问题，虽已做修正与边界处理，仍可能影响结果外推；问题二、四的启发式/进化求解难以提供全局最优证明，部分精确算例存在正 gap；线性或代理评分难以完全刻画突发拥塞与强非线性耦合；电网侧未计入跨区潮流与线路容量，网络约束主要体现为时延；碳预算、权重与情景参数仍带有一定经验性，且缺乏更长时间跨度的实测运行数据做外部验证。
+
+\textbf{\qquad 模型的推广：}将区域算力参数、任务轨迹、分时电价、碳强度、新能源与储能参数替换为其他智算集群或云数据中心的实时监测数据后，本文的预测—调度—储电协同框架可直接迁移用于多机房负荷均衡与低碳运行。进一步地，通过在线监测与滚动更新机制，模型还可拓展至边缘计算节点调度、工业高耗能负荷的储能削峰，以及园区级综合能源系统中“用电负荷—储能—新能源”的联合优化场景。
+\newpage
+\zihao{-4}
+
+
+\vspace{1em}
+
+
+\begin{thebibliography}{99}
+
+
+\end{thebibliography}
+
+
+\newpage
+\zihao{-4}
+
+
+
+
+\section{附录}
+
+\end{document}
