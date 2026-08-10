@@ -1792,4 +1792,203 @@ Deb~K, Pratap~A, Agarwal~S, et al. A fast and elitist multiobjective genetic alg
 
 \section{附录}
 
+\subsection{主要符号说明}
+
+表~\ref{tab:app-symbols} 汇总全文常用符号。未列出的临时记号在首次出现处定义。
+
+\begin{table}[H]
+\centering
+\small
+\caption{主要符号说明}
+\label{tab:app-symbols}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{ll}
+\toprule
+符号 & 含义 \\
+\midrule
+$\mathcal{R},\mathcal{I},\mathcal{K}$ & 区域集合、任务集合、任务类型集合 \\
+$r,i,k,t$ & 区域、任务、类型、小时索引 \\
+$g_i,d_i,a_i,o_i$ & 任务 GPU 需求、时长（分钟）、到达小时、来源区域 \\
+$L_i^{\max},H_i$ & 任务最大允许时延、最晚完成小时 \\
+$q_{i,s,t}$ & 任务 $i$ 于第 $s$ 小时开工时在第 $t$ 小时的分钟重叠比例 \\
+$G_r,\pi_k,\mathrm{PUE}_r$ & 区域可用 GPU、类型单位 GPU 功率、区域 PUE \\
+$P_{r,t}^{\mathrm{AI}},P_{r,t}^{\mathrm{NonAI}}$ & 区域 $r$ 第 $t$ 小时 AI / 非 AI IT 负荷 \\
+$\ell_{o_i r}$ & 来源区到执行区的网络时延 \\
+$N_{rkt},\lambda_{rk}$ & 区域--类型小时到达数及其泊松强度 \\
+$U,\bar{W}$ & 峰值 GPU 利用率、平均等待时间 \\
+$p^{\mathrm{buy}}_{r,t},p^{\mathrm{sell}}_{r,t},\mathrm{CI}_{r,t}$ & 购电价、售电价、碳强度 \\
+$G_{r,t},S_{r,t}$ & 购电功率、售电功率 \\
+$C_{r,t},D_{r,t},\mathrm{SOC}_{r,t}$ & 充电功率、放电功率、储能荷电状态 \\
+$\eta_r^{c},\eta_r^{d}$ & 充/放电效率 \\
+$E,C$ & 系统碳排放、运行成本 \\
+$\varepsilon,\alpha,\gamma$ & 碳/等待约束阈值、碳间隙系数、新能源缩放因子 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{区域算力与储能参数}
+
+表~\ref{tab:app-gpu} 与表~\ref{tab:app-storage} 给出附件中的区域静态参数，供复核模型输入。
+
+\begin{table}[H]
+\centering
+\footnotesize
+\caption{各区域 GPU 与功率容量参数}
+\label{tab:app-gpu}
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{lrrrrr}
+\toprule
+区域 & 总GPU & 可用GPU & IT上限/MW & PUE & 设施上限/MW \\
+\midrule
+RegionA & 700 & 630 & 420 & 1.35 & 567.0 \\
+RegionB & 650 & 585 & 410 & 1.35 & 553.5 \\
+RegionC & 600 & 540 & 405 & 1.38 & 558.9 \\
+RegionD & 1600 & 1472 & 720 & 1.28 & 921.6 \\
+RegionE & 1100 & 1012 & 560 & 1.25 & 700.0 \\
+RegionF & 1050 & 966 & 540 & 1.27 & 685.8 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\footnotesize
+\caption{各区域储能与购售电边界参数}
+\label{tab:app-storage}
+\setlength{\tabcolsep}{2.8pt}
+\begin{tabular}{lrrrrrrr}
+\toprule
+区域 & 容量/MWh & 初值SOC & $P_{\max}^{\mathrm{ch/dis}}$ & $\eta^{c}/\eta^{d}$ & 购电上限 & 售电上限 \\
+\midrule
+RegionA & 350 & 157.5 & 100 & 0.93/0.92 & 550 & 0 \\
+RegionB & 320 & 144.0 & 90 & 0.93/0.92 & 520 & 0 \\
+RegionC & 300 & 135.0 & 85 & 0.93/0.92 & 510 & 0 \\
+RegionD & 900 & 405.0 & 260 & 0.94/0.93 & 510 & 180 \\
+RegionE & 820 & $370^{*}$ & 240 & 0.94/0.93 & 370 & 220 \\
+RegionF & 850 & 382.5 & 250 & 0.94/0.93 & 340 & 220 \\
+\bottomrule
+\end{tabular}\\[0.3em]
+{\footnotesize $^{*}$问题三校验后 RegionE 初始 SOC 取修正值 $369$\,MWh。}
+\end{table}
+
+\subsection{关键算法伪代码}
+
+\begin{algorithm}[H]
+\caption{问题一动态贪心可行调度}
+\label{alg:q1-greedy}
+\begin{algorithmic}[1]
+\REQUIRE 任务集 $\mathcal{I}$，区域参数，时延矩阵，carry-in 占用
+\ENSURE 可行调度 $\{(r_i,s_i)\}$
+\STATE 按“实时优先—可行区少—松弛紧—GPU$\cdot$时长大”对任务排序
+\FOR{每个任务 $i\in\mathcal{I}$}
+    \STATE 生成满足到达、截止、终端时刻与时延约束的候选集 $\mathcal{C}_i$
+    \STATE 剔除违反 GPU / IT / 设施功率容量的候选
+    \STATE 在剩余候选中选择使代理代价（等待、峰值、迁移等）最小的 $(r,s)$
+    \STATE 更新区域逐时占用
+\ENDFOR
+\STATE \textbf{return} 全部任务的执行区域与开工小时
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\caption{问题一字典序 MILP（等待优先，再削峰）}
+\label{alg:q1-lex}
+\begin{algorithmic}[1]
+\REQUIRE 候选集合 $\{\mathcal{C}_i\}$，容量与功率约束
+\ENSURE 主推调度方案
+\STATE \textbf{阶段一：}最小化平均等待 $\bar{W}$，得最优值 $\bar{W}^\ast$
+\STATE \textbf{阶段二：}在 $\bar{W}\le 1.05\bar{W}^\ast$ 约束下最小化峰值利用率 $U$
+\STATE 以贪心解作 MIP start，限时求解并记录 gap
+\STATE 独立校验硬约束（容量、时延、截止、终端时刻）
+\STATE \textbf{return} 可行调度及评价指标
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\caption{问题四两阶段算电协同}
+\label{alg:q4-two-stage}
+\begin{algorithmic}[1]
+\REQUIRE 全量任务、逐时电价/碳强度/新能源、储能参数、情景设定
+\ENSURE 调度方案与储电运行计划
+\STATE \textbf{阶段一：}碳电价感知贪心确定各任务 $(r_j,s_j)$，生成区域 AI 负荷
+\STATE 若情景含不可达碳预算，提高阶段一碳权重并重调度
+\STATE \textbf{阶段二：}对各区域独立求解储—电 LP，最小化购售电运行成本
+\STATE 按需加入碳/峰值/新能源利用率的 $\varepsilon$-约束
+\STATE 汇总成本、碳排、等待、时延、峰值净购电与新能源利用率
+\STATE \textbf{return} 联合运行结果及可行性标志
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{补充计算结果}
+
+\subsubsection{问题一：三类预测口径的系统级误差}
+
+表~\ref{tab:app-forecast-three} 给出最终 $24$ 小时在任务数、到达 GPU 与 GPU-hour 三种口径下的系统级误差，作为正文多层级评价的补充。
+
+\begin{table}[H]
+\centering
+\small
+\caption{最终测试窗系统级三类预测口径误差}
+\label{tab:app-forecast-three}
+\begin{tabular}{lcccc}
+\toprule
+口径 & MAE & RMSE & WAPE & 欠预测比例 \\
+\midrule
+任务数 & $3.48$ & $4.38$ & $15.51\%$ & $66.67\%$ \\
+到达 GPU & $176.68$ & $221.05$ & $24.30\%$ & $70.83\%$ \\
+GPU-hour & $748.65$ & $995.82$ & $29.95\%$ & $62.50\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{问题一：主推方案硬约束校验摘要}
+
+对字典序主推解（$538$ 个新任务，$58$ 个 carry-in）的独立校验结果见表~\ref{tab:app-q1-hard}：全部硬约束通过，峰值利用率 $56.47\%$，平均等待 $0$。
+
+\begin{table}[H]
+\centering
+\small
+\caption{问题一主推方案硬约束与关键指标}
+\label{tab:app-q1-hard}
+\begin{tabular}{lc}
+\toprule
+校验项 & 结果 \\
+\midrule
+重复/缺失分配 & $0$ / $0$ \\
+实时开工、到达、截止、终端时刻违规 & 均为 $0$ \\
+时延违规 & $0$ \\
+GPU / IT / 设施功率越限 & 均为 $0$ \\
+平均等待 / 最大等待 & $0$ / $0$ \\
+迁移率 & $12.27\%$ \\
+峰值 / 平均 GPU 利用率 & $56.47\%$ / $38.8\%$ \\
+MIP gap & $0.53\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{问题四：联合基线分区峰值净购电}
+
+表~\ref{tab:app-q4-peak} 给出联合策略基线下六区峰值净购电。东部高负荷区更易触及购电上限，西部与新能源富集区峰值相对较低。
+
+\begin{table}[H]
+\centering
+\small
+\caption{联合基线各区域峰值净购电}
+\label{tab:app-q4-peak}
+\begin{tabular}{lrr}
+\toprule
+区域 & 峰值净购电/MW & 购电上限/MW \\
+\midrule
+RegionA & 550.0 & 550 \\
+RegionB & 520.0 & 520 \\
+RegionC & 510.0 & 510 \\
+RegionD & 440.6 & 510 \\
+RegionE & 370.0 & 370 \\
+RegionF & 340.0 & 340 \\
+\midrule
+合计 & 2730.6 & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \end{document}
