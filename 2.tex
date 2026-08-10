@@ -162,7 +162,7 @@
 
 \subsection{问题背景}
 
-随着人工智能应用规模持续扩大，数据中心的算力需求和能源消耗快速增长，电力成本、碳排放及其对电网运行的影响日益突出\cite{dayarathna2016dc,liu2015glb}。传统的数据中心调度主要关注计算资源利用率和任务完成效率，而算电协同进一步考虑算力负荷与电力系统之间的实时耦合，要求在保证计算任务服务质量的同时，协调电价、碳强度、新能源出力和储能状态，实现计算资源与能源资源的协同配置\cite{qureshi2009cutting}。
+随着人工智能应用规模持续扩大，数据中心的算力需求和能源消耗快速增长，电力成本、碳排放及其对电网运行的影响日益突出\cite{邓维2013新能源,宋杰2018混合供电}。传统的数据中心调度主要关注计算资源利用率和任务完成效率，而算电协同进一步考虑算力负荷与电力系统之间的实时耦合，要求在保证计算任务服务质量的同时，协调电价、碳强度、新能源出力和储能状态，实现计算资源与能源资源的协同配置\cite{黄焱2016能耗费用}。
 
 不同区域在用户距离、算力容量和能源条件等方面具有明显差异。东部区域靠近用户，能够为时延敏感任务提供较好的服务质量，但面临较高的计算负荷和能源压力；西部算力中心及新能源富集区域具备较大的算力承载能力和低碳用能优势，却可能因跨区域迁移增加网络时延。同时，实时推理、批量推理和AI训练任务具有不同的时延敏感性与调度弹性，而新能源出力的波动性又需要储能进行跨时段调节。因此，如何在任务服务质量、运行成本、碳排放、新能源利用率和电网交互压力之间实现合理权衡，是本题需要解决的核心问题。
 
@@ -566,7 +566,7 @@ D_{rkt}=\sum_{j=1}^{N_{rkt}}G_{rkj},
 
 \subsubsection{复合泊松预测模型}
 
-任务到达常可用泊松过程刻画，GPU 需求则可视为随机任务规模叠加形成的复合计数过程\cite{ross2014probability}。任务到达数量采用泊松分布描述：
+短期算力需求预测可借鉴电力系统负荷预测中“先诊断规律、再选择模型”的思路\cite{康重庆2004负荷预测}。考虑到任务到达具有随机性，GPU 需求可视为随机任务规模叠加形成的复合计数过程。任务到达数量采用泊松分布描述：
 \begin{equation}
 N_{rkt}\sim\mathrm{Poisson}(\lambda_{rk}),
 \qquad
@@ -724,14 +724,14 @@ $\ell(o_i,r)\le L_i^{\max}$ 已在候选生成时保证。
 \subsubsection{优化目标与求解策略}
 引入峰值利用率变量 $U$，对每个 $(r,t)$ 施加联结约束
 $\big(P^{\mathrm{gpu,carry}}_{r,t}+\sum_{i,s} g_i q_{i,s,t}x_{i,r,s}\big)/G_r\le U$，则最小化 $U$ 即
-削峰。为兼顾服务质量，采用\textbf{字典序}目标\cite{marler2004mosurvey}：
+削峰。为兼顾服务质量，采用\textbf{字典序}目标\cite{公茂果2009进化多目标}：
 \begin{align}
 \textbf{阶段一：}\ & \min\ \bar{W}=\tfrac{1}{|\mathcal{I}|}\textstyle\sum_{i,r,s}(s-a_i)\,x_{i,r,s};\\
 \textbf{阶段二：}\ & \min\ U \quad\text{s.t.}\ \ \bar{W}\le 1.05\,\bar{W}^\ast,
 \end{align}
 其中 $\bar{W}^\ast$ 为阶段一最优平均等待。实测 $\bar{W}^\ast=0$，故阶段二在近似零等待下最小化峰值；
 目标另含 $10^{-5}\!\sim\!10^{-6}$ 量级的迁移、时延、尾段平滑项用于择优。为刻画服务--削峰权衡，进一步以
-$\varepsilon$-约束（固定 $\bar{W}\le\varepsilon$ 后最小化 $U$）扫描前沿\cite{mavrotas2009eps}。
+$\varepsilon$-约束（固定 $\bar{W}\le\varepsilon$ 后最小化 $U$）扫描前沿\cite{mavrotas2009eps,公茂果2009进化多目标}。
 
 模型为含约 $3.4\times10^{4}$ 个 0--1 变量的大规模 MILP，采用两段式求解：先以\textbf{动态贪心}
 （实时任务、可行区域少、松弛小、GPU-hour 大者优先）生成可行解作为\textbf{热启动}，再由开源求解器
@@ -989,7 +989,7 @@ greedy\_mix      & (1.5, 1.5, 0.8, 0.6) & 全面混合 \\
 \end{table}
 \subsection{求解算法：NSGA-II}
 
-由于任务数量庞大，直接求解MILP在有限时间内难以获得全局最优解。本问采用第二代非支配排序遗传算法（NSGA-II）作为多目标优化引擎\cite{deb2002nsga}。NSGA-II通过模拟生物进化过程中的选择、交叉和变异操作，在多目标空间中搜索Pareto最优解集。NSGA-II能够使用非支配排序和拥挤度距离保持解的多样性和收敛性，同时无需对目标函数进行加权或归一化，可以直接处理多个冲突目标。
+由于任务数量庞大，直接求解MILP在有限时间内难以获得全局最优解。本问采用第二代非支配排序遗传算法（NSGA-II）作为多目标优化引擎\cite{deb2002nsga,公茂果2009进化多目标}。NSGA-II通过模拟生物进化过程中的选择、交叉和变异操作，在多目标空间中搜索Pareto最优解集。NSGA-II能够使用非支配排序和拥挤度距离保持解的多样性和收敛性，同时无需对目标函数进行加权或归一化，可以直接处理多个冲突目标。
 
 \subsubsection{染色体编码}
 
@@ -1244,7 +1244,7 @@ nsga2\_max\_renew  & 533366736 & 431712 & 38.11 & 0.095 \\
 \FloatBarrier
 \subsection{问题分析}
 问题三要求在在给定任务调度和逐时负荷的基础上，建立储能协同优化模型，设
-计储能充放电策略。故本问使用由第二问 greedy\_bal2 策略生成的给定的各区域的任务调度结果，每个任务的开始时间、结束时间、IT 功率和设施功率均已确定。在此基础上，为各区域配置储能系统，设计最优充放电策略。同时，评估储能系统对运行成本、碳排放、区域峰值净购电功率和负荷波动程度的改善作用\cite{dunn2011ees,丁明2013储能}。根据题目设定，不建模跨区域线路潮流，因此各区域的电力与储能优化解耦，可按区域独立建立模型进行求解。
+计储能充放电策略。故本问使用由第二问 greedy\_bal2 策略生成的给定的各区域的任务调度结果，每个任务的开始时间、结束时间、IT 功率和设施功率均已确定。在此基础上，为各区域配置储能系统，设计最优充放电策略。同时，评估储能系统对运行成本、碳排放、区域峰值净购电功率和负荷波动程度的改善作用\cite{丁明2013储能}。根据题目设定，不建模跨区域线路潮流，因此各区域的电力与储能优化解耦，可按区域独立建立模型进行求解。
 
 \subsection{储能荷电状态数据的校验与修正}
 
@@ -1390,7 +1390,7 @@ R^{\mathrm{raw}}_{r,t}
 \bigr\},
 \end{equation}
 其中 $U^{\mathrm{base}},C^{\mathrm{RE,base}},S^{\mathrm{base}}$ 分别为附件基准方案中的新能源直供、新能源充电与售电分量，$R^{\mathrm{raw}}$ 为附件原始可用出力，利用率指标仍以附件 $\sum R^{\mathrm{raw}}$ 为分母报告。
-在上述边界下，若将全部任务起止、机房选择、储能充放电与购售电纳入单一大规模混合整数规划，变量与耦合约束规模过大，且碳、峰值等目标与成本目标量纲不一，直接加权难以解释。为此，本文采用\textbf{两阶段协同优化}\cite{radovanovic2022carbon,liu2015glb}：阶段一在\textbf{硬资源与服务质量约束下}，完成任务的时空落点，形成各区域 AI 负荷轨迹；阶段二在\textbf{负荷固定后}，对各区域独立求解储—电线性规划，主目标最小化运行成本
+在上述边界下，若将全部任务起止、机房选择、储能充放电与购售电纳入单一大规模混合整数规划，变量与耦合约束规模过大，且碳、峰值等目标与成本目标量纲不一，直接加权难以解释。为此，本文采用\textbf{两阶段协同优化}\cite{康重庆2022碳视角,曹晓峻2018混合运行}：阶段一在\textbf{硬资源与服务质量约束下}，完成任务的时空落点，形成各区域 AI 负荷轨迹；阶段二在\textbf{负荷固定后}，对各区域独立求解储—电线性规划，主目标最小化运行成本
 \begin{equation}
 \min\;
 C
@@ -1665,20 +1665,20 @@ E\le\varepsilon.
 
 \begin{thebibliography}{99}
 
-\bibitem{dayarathna2016dc}
-Dayarathna~M, Wen~Y, Fan~R. Data center energy consumption modeling: A survey[J]. IEEE Communications Surveys \& Tutorials, 2016, 18(1): 732-794.
+\bibitem{邓维2013新能源}
+邓维, 刘方明, 金海, 李丹. 云计算数据中心的新能源应用:研究现状与趋势[J]. 计算机学报, 2013, 36(3): 582-598.
 
-\bibitem{liu2015glb}
-Liu~Z, Lin~M, Wierman~A, et al. Greening geographical load balancing[J]. IEEE/ACM Transactions on Networking, 2015, 23(2): 657-671.
+\bibitem{宋杰2018混合供电}
+宋杰, 孙宗哲, 刘慧, 鲍玉斌, 于戈. 混合供电数据中心能耗优化研究进展[J]. 计算机学报, 2018, 41(12): 2670-2688.
 
-\bibitem{qureshi2009cutting}
-Qureshi~A, Weber~R, Balakrishnan~H, et al. Cutting the electric bill for Internet-scale systems[C]//Proceedings of the ACM SIGCOMM 2009 Conference. New York: ACM, 2009: 123-134.
+\bibitem{黄焱2016能耗费用}
+黄焱, 王鹏, 谢高辉, 安俊秀. 智能电网下数据中心能耗费用优化综述[J]. 浙江大学学报(工学版), 2016, 50(12): 2386-2399.
 
-\bibitem{ross2014probability}
-Ross~S~M. Introduction to Probability Models[M]. 11th ed. Amsterdam: Academic Press, 2014.
+\bibitem{康重庆2004负荷预测}
+康重庆, 夏清, 张伯明. 电力系统负荷预测研究综述与发展方向的探讨[J]. 电力系统自动化, 2004, 28(17): 1-11.
 
-\bibitem{marler2004mosurvey}
-Marler~R~T, Arora~J~S. Survey of multi-objective optimization methods for engineering[J]. Structural and Multidisciplinary Optimization, 2004, 26(6): 369-395.
+\bibitem{公茂果2009进化多目标}
+公茂果, 焦李成, 杨咚咚, 马文萍. 进化多目标优化算法研究[J]. 软件学报, 2009, 20(2): 271-289.
 
 \bibitem{mavrotas2009eps}
 Mavrotas~G. Effective implementation of the $\varepsilon$-constraint method in multi-objective mathematical programming problems[J]. Applied Mathematics and Computation, 2009, 213(2): 455-465.
@@ -1686,14 +1686,14 @@ Mavrotas~G. Effective implementation of the $\varepsilon$-constraint method in m
 \bibitem{deb2002nsga}
 Deb~K, Pratap~A, Agarwal~S, et al. A fast and elitist multiobjective genetic algorithm: NSGA-II[J]. IEEE Transactions on Evolutionary Computation, 2002, 6(2): 182-197.
 
-\bibitem{dunn2011ees}
-Dunn~B, Kamath~H, Tarascon~J~M. Electrical energy storage for the grid: A battery of choices[J]. Science, 2011, 334(6058): 928-935.
-
 \bibitem{丁明2013储能}
 丁明, 陈忠, 苏建徽, 等. 可再生能源发电中的电池储能系统综述[J]. 电力系统自动化, 2013, 37(1): 19-25, 98.
 
-\bibitem{radovanovic2022carbon}
-Radovanovi\'{c}~A, Koningstein~R, Schneider~I, et al. Carbon-aware computing for datacenters[J]. IEEE Transactions on Power Systems, 2023, 38(2): 1270-1280.
+\bibitem{康重庆2022碳视角}
+康重庆, 杜尔顺, 李姚旺, 张宁, 陈启鑫, 郭鸿业, 王鹏. 新型电力系统的“碳视角”:科学问题与研究框架[J]. 电网技术, 2022, 46(3): 821-833.
+
+\bibitem{曹晓峻2018混合运行}
+曹晓峻, 高赐威, 李德智, 杨建林. 数据网络与电力网络混合运行建模及其参与系统经济运行[J]. 中国电机工程学报, 2018, 38(5): 1448-1456.
 
 \end{thebibliography}
 
