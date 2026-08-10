@@ -1,0 +1,30 @@
+{
+  "model": "continuous linear multi-objective storage dispatch",
+  "time_horizon": [
+    0,
+    2406
+  ],
+  "hours": 2407,
+  "regions": [
+    "RegionA",
+    "RegionB",
+    "RegionC",
+    "RegionD",
+    "RegionE",
+    "RegionF"
+  ],
+  "balanced_weights": {
+    "cost": 0.25,
+    "carbon": 0.25,
+    "peak": 0.25,
+    "ramp": 0.25
+  },
+  "normalization": "per-region payoff-matrix min-max spread",
+  "power_balance": "GridPurchase + Renewable + Discharge = FacilityLoad + Charge + GridSell + Curtailment",
+  "soc_terminal_rule": "SOC_2406 >= InitialSOC",
+  "python": "3.11.4 (main, Jul  5 2023, 08:54:11) [Clang 14.0.6 ]",
+  "platform": "macOS-26.3-arm64-arm-64bit",
+  "numpy": "1.26.4",
+  "pandas": "1.5.3",
+  "scipy": "1.17.1"
+}

@@ -1,0 +1,8 @@
+Scenario,Scenario_CN,MaxAbsEnergyBalanceResidual_MW,MaxAbsSOCDynamicsResidual_MWh,MaxSimultaneousChargeDischarge_MW,MaxSimultaneousBuySell_MW,MaxTerminalSOCShortfall_MWh
+attachment_baseline,附件参考策略,0.00020041662503444968,0.9999439999999709,0.0,220.0,193.3246
+no_storage,无储能反事实,0.0,0.0,0.0,0.0,0.0
+cost_min,成本最优,5.684341886080802e-14,1.1368683772161603e-13,0.0,0.0,0.0
+carbon_min,碳排最优,5.684341886080802e-14,1.1368683772161603e-13,0.0,0.0,0.0
+peak_min,削峰最优,5.684341886080802e-14,1.1368683772161603e-13,0.0,0.0,0.0
+smooth_min,平滑最优,5.684341886080802e-14,1.1368683772161603e-13,0.0,0.0,0.0
+balanced,多目标折中,1.4210854715202004e-13,2.8421709430404007e-13,0.0,0.0,0.0
