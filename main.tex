@@ -1921,9 +1921,51 @@ RegionF & 850 & 382.5 & 250 & 0.94/0.93 & 340 & 220 \\
 
 \subsection{补充计算结果}
 
-\subsubsection{问题一：三类预测口径的系统级误差}
+本附录汇总问题一、二、四的主要数值结果，便于与正文对照复核。
 
-表~\ref{tab:app-forecast-three} 给出最终 $24$ 小时在任务数、到达 GPU 与 GPU-hour 三种口径下的系统级误差，作为正文多层级评价的补充。
+\subsubsection{问题一：滚动回测候选模型排名}
+
+表~\ref{tab:app-q1-backtest} 给出滚动 $24$ 小时回测中按平均 RMSE 排序的前 6 个模型。复合泊松与全历史均值并列最优。
+
+\begin{table}[H]
+\centering
+\small
+\caption{问题一滚动回测主要候选模型（按 RMSE 升序）}
+\label{tab:app-q1-backtest}
+\begin{tabular}{lcccc}
+\toprule
+模型 & MAE & RMSE & WAPE & Max Regret \\
+\midrule
+compound\_poisson & $26.35$ & $50.82$ & $0.765$ & $0.082$ \\
+history\_mean & $26.35$ & $50.82$ & $0.765$ & $0.082$ \\
+ewma\_0.003 & $26.48$ & $50.88$ & $0.769$ & $0.207$ \\
+ewma\_0.01 & $26.50$ & $50.91$ & $0.770$ & $0.255$ \\
+window\_168 & $26.47$ & $50.93$ & $0.769$ & $0.317$ \\
+window\_336 & $26.55$ & $50.94$ & $0.771$ & $0.389$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{问题一：最终测试窗多层级与三口径误差}
+
+表~\ref{tab:app-q1-multilevel} 为到达 GPU 的多层级误差；表~\ref{tab:app-forecast-three} 为系统级三类物理口径误差。
+
+\begin{table}[H]
+\centering
+\small
+\caption{最终 $24$ 小时到达 GPU 多层级预测误差}
+\label{tab:app-q1-multilevel}
+\begin{tabular}{lcccc}
+\toprule
+层级 & MAE & RMSE & WAPE & 欠预测比例 \\
+\midrule
+底层 $18$ 序列 & $26.52$ & $53.79$ & $65.65\%$ & $40.51\%$ \\
+区域层 $6$ & $65.62$ & $95.10$ & $54.15\%$ & $44.44\%$ \\
+类型层 $3$ & $67.09$ & $122.55$ & $27.69\%$ & $59.72\%$ \\
+系统层 $1$ & $176.68$ & $221.05$ & $24.30\%$ & $70.83\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \begin{table}[H]
 \centering
@@ -1941,9 +1983,28 @@ GPU-hour & $748.65$ & $995.82$ & $29.95\%$ & $62.50\%$ \\
 \end{tabular}
 \end{table}
 
-\subsubsection{问题一：主推方案硬约束校验摘要}
+\subsubsection{问题一：调度方法对比与主推方案校验}
 
-对字典序主推解（$538$ 个新任务，$58$ 个 carry-in）的独立校验结果见表~\ref{tab:app-q1-hard}：全部硬约束通过，峰值利用率 $56.47\%$，平均等待 $0$。
+表~\ref{tab:app-q1-methods} 比较基础调度启发式与加权 MILP；表~\ref{tab:app-q1-hard} 给出字典序主推解的硬约束校验。主推方案平均等待 $0$、峰值利用率 $56.47\%$、MIP gap $0.53\%$，全部硬约束通过。
+
+\begin{table}[H]
+\centering
+\footnotesize
+\caption{问题一基础调度方法对比（$538$ 任务，均通过硬约束）}
+\label{tab:app-q1-methods}
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{lccccc}
+\toprule
+方法 & 平均等待/h & 最大等待/h & 迁移率 & 峰值利用率 & 平均利用率 \\
+\midrule
+Local-First & $0.020$ & $4$ & $0.0\%$ & $99.97\%$ & $37.2\%$ \\
+Most-Available & $1.119$ & $18$ & $53.0\%$ & $57.5\%$ & $39.0\%$ \\
+Dynamic-Greedy & $0.065$ & $5$ & $1.5\%$ & $93.2\%$ & $37.3\%$ \\
+加权 MILP & $0.413$ & $17$ & $3.7\%$ & $49.3\%$ & $38.6\%$ \\
+\textbf{字典序（主推）} & $\mathbf{0.000}$ & $\mathbf{0}$ & $12.3\%$ & $\mathbf{56.5\%}$ & $38.8\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \begin{table}[H]
 \centering
@@ -1966,9 +2027,108 @@ MIP gap & $0.53\%$ \\
 \end{tabular}
 \end{table}
 
-\subsubsection{问题四：联合基线分区峰值净购电}
+\subsubsection{问题一：区域 GPU 需求结构摘要}
 
-表~\ref{tab:app-q4-peak} 给出联合策略基线下六区峰值净购电。东部高负荷区更易触及购电上限，西部与新能源富集区峰值相对较低。
+表~\ref{tab:app-q1-region-share} 汇总各区域累计 GPU 需求占比，可见 RegionD/E/F 合计贡献约 $75\%$ 的 GPU 需求。
+
+\begin{table}[H]
+\centering
+\small
+\caption{各区域累计 GPU 需求占比}
+\label{tab:app-q1-region-share}
+\begin{tabular}{lrrr}
+\toprule
+区域 & 任务数 & 累计GPU需求 & GPU需求占比 \\
+\midrule
+RegionA & $10{,}062$ & $131{,}721$ & $8.94\%$ \\
+RegionB & $9{,}200$ & $126{,}814$ & $8.61\%$ \\
+RegionC & $7{,}559$ & $110{,}624$ & $7.51\%$ \\
+RegionD & $9{,}560$ & $454{,}967$ & $30.87\%$ \\
+RegionE & $6{,}912$ & $324{,}176$ & $22.00\%$ \\
+RegionF & $6{,}707$ & $325{,}312$ & $22.08\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{问题二：碳感知调度代表方案}
+
+表~\ref{tab:app-q2-summary} 摘录贪心推荐解与 NSGA-II 若干极端/折中解，便于对照正文雷达图结论。推荐方案为 \texttt{greedy\_bal2}。
+
+\begin{table}[H]
+\centering
+\footnotesize
+\caption{问题二代表调度方案四项目标值}
+\label{tab:app-q2-summary}
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{lrrrr}
+\toprule
+方案 & 成本/$10^8$ & 碳排/$10^5$ & 时延/ms & 新能源利用率 \\
+\midrule
+\texttt{greedy\_bal2}（推荐） & $3.835$ & $3.400$ & $35.88$ & $0.093$ \\
+\texttt{greedy\_cost} & $3.837$ & $3.400$ & $35.86$ & $0.093$ \\
+\texttt{greedy\_carbon} & $3.837$ & $3.405$ & $35.89$ & $0.093$ \\
+\texttt{nsga2\_min\_cost} & $3.984$ & $3.454$ & $36.10$ & $0.093$ \\
+\texttt{nsga2\_min\_carbon} & $3.989$ & $3.458$ & $36.09$ & $0.093$ \\
+\texttt{nsga2\_knee} & $5.399$ & $4.372$ & $38.16$ & $0.095$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{问题四：阶段一策略基线对比}
+
+表~\ref{tab:app-q4-baseline} 汇总四种阶段一策略在相同阶段二设定下的关键指标。联合策略在等待可控前提下取得较优综合表现。
+
+\begin{table}[H]
+\centering
+\footnotesize
+\caption{问题四基线策略对比}
+\label{tab:app-q4-baseline}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lcccccc}
+\toprule
+策略 & 成本/$10^9$ & 碳/$10^6$ & 等待/h & 时延/ms & 峰值净购电/MW & 硬约束 \\
+\midrule
+local\_first & $1.706$ & $1.741$ & $0.000$ & $5.06$ & $2670$ & 通过 \\
+lowest\_price & $1.607$ & $1.684$ & $77.167$ & $28.09$ & $2800$ & 通过 \\
+lowest\_carbon & $1.632$ & $1.616$ & $32.789$ & $28.67$ & $2732$ & 通过 \\
+\textbf{joint} & $\mathbf{1.632}$ & $\mathbf{1.612}$ & $\mathbf{0.272}$ & $25.89$ & $2731$ & 通过 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{问题四：情景结果汇总}
+
+表~\ref{tab:app-q4-scenarios} 汇总碳、电价与新能源情景的关键指标；表~\ref{tab:app-q4-peak} 给出联合基线分区峰值净购电。
+
+\begin{table}[H]
+\centering
+\footnotesize
+\caption{问题四多情景关键指标汇总}
+\label{tab:app-q4-scenarios}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{llcccc}
+\toprule
+类别 & 情景 & 成本/$10^9$ & 碳/$10^6$ & 等待/h & 可行性 \\
+\midrule
+基线 & joint & $1.632$ & $1.612$ & $0.272$ & 是 \\
+\midrule
+\multirow{4}{*}{碳约束}
+ & $100\%E_0$ & $1.632$ & $1.612$ & $0.272$ & 是 \\
+ & $90\%E_0$ & $1.719$ & $1.519$ & $5.402$ & 否 \\
+ & 碳间隙 $75\%$ & $1.649$ & $1.571$ & $0.272$ & 是 \\
+ & 碳间隙 $50\%$ & $1.693$ & $1.530$ & $0.272$ & 是 \\
+\midrule
+\multirow{3}{*}{电价}
+ & 峰谷拉大 & $1.508$ & $1.731$ & $0.270$ & 是 \\
+ & 平价 & $1.766$ & $1.599$ & $0.269$ & 是 \\
+ & 碳—电联动 & $1.760$ & $1.598$ & $0.274$ & 是 \\
+\midrule
+\multirow{2}{*}{新能源}
+ & $\gamma=0.8$ & $1.933$ & $1.834$ & $0.272$ & 是 \\
+ & $\gamma=1.2$ & $1.347$ & $1.440$ & $0.272$ & 是 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \begin{table}[H]
 \centering
@@ -1979,14 +2139,36 @@ MIP gap & $0.53\%$ \\
 \toprule
 区域 & 峰值净购电/MW & 购电上限/MW \\
 \midrule
-RegionA & 550.0 & 550 \\
-RegionB & 520.0 & 520 \\
-RegionC & 510.0 & 510 \\
-RegionD & 440.6 & 510 \\
-RegionE & 370.0 & 370 \\
-RegionF & 340.0 & 340 \\
+RegionA & $550.0$ & $550$ \\
+RegionB & $520.0$ & $520$ \\
+RegionC & $510.0$ & $510$ \\
+RegionD & $440.6$ & $510$ \\
+RegionE & $370.0$ & $370$ \\
+RegionF & $340.0$ & $340$ \\
 \midrule
-合计 & 2730.6 & --- \\
+合计 & $2730.6$ & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{全文关键推荐方案一览}
+
+表~\ref{tab:app-recommend} 汇总各问推荐方案的核心指标，便于快速查阅。
+
+\begin{table}[H]
+\centering
+\footnotesize
+\caption{各问推荐方案核心指标一览}
+\label{tab:app-recommend}
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{llp{6.2cm}}
+\toprule
+问题 & 推荐方案 & 核心结果 \\
+\midrule
+问题一预测 & 复合泊松 & 系统级 WAPE $24.30\%$，$90\%$ 覆盖率 $93.75\%$ \\
+问题一调度 & 字典序 MILP & 等待 $0$，峰值利用率 $56.5\%$，gap $0.53\%$ \\
+问题二 & \texttt{greedy\_bal2} & 成本 $3.835\times10^8$，碳 $3.400\times10^5$，时延 $35.88$\,ms \\
+问题四 & joint 两阶段 & 成本 $1.632\times10^9$，碳 $1.612\times10^6$，等待 $0.27$\,h \\
 \bottomrule
 \end{tabular}
 \end{table}
