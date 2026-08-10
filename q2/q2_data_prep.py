@@ -17,11 +17,19 @@ from pathlib import Path
 
 # ── 路径设置 ──────────────────────────────────────────────
 SCRIPT_DIR = Path(__file__).resolve().parent
-DATA_DIR = SCRIPT_DIR / "附件数据"  # 存放所有 .xlsx 的文件夹
+REPO_ROOT = SCRIPT_DIR.parent
 OUTPUT_DIR = SCRIPT_DIR / "output"  # 中间结果输出文件夹
 
-if not DATA_DIR.exists():
-    raise FileNotFoundError(f"数据目录不存在: {DATA_DIR}")
+_candidates = [
+    SCRIPT_DIR / "附件数据",
+    REPO_ROOT / "data",
+    REPO_ROOT / "task_c" / "附件数据",
+]
+DATA_DIR = next((p for p in _candidates if p.exists()), None)
+if DATA_DIR is None:
+    raise FileNotFoundError(
+        "未找到数据目录，请将官方 Excel 放到 q2/附件数据/ 或仓库根 data/"
+    )
 
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -188,7 +196,9 @@ print("=" * 60)
 
 gpu_info_path = DATA_DIR / "gpu_information.xlsx"
 if not gpu_info_path.exists():
-    raise FileNotFoundError(f"缺少文件: {gpu_info_path}")
+    gpu_info_path = DATA_DIR / "GPU_information.xlsx"
+if not gpu_info_path.exists():
+    raise FileNotFoundError(f"缺少文件: gpu_information.xlsx / GPU_information.xlsx")
 
 gi = pd.read_excel(gpu_info_path)
 print(gi)

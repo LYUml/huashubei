@@ -19,6 +19,7 @@
 \usepackage{amssymb}
 \usepackage{tabularx}
 \usepackage{graphicx}
+\graphicspath{{figures/}}
 \usepackage{enumitem}
 \usepackage{subcaption}
 \usepackage{url}
@@ -199,7 +200,7 @@
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.50\textwidth]{figures/fig_q4_concept_regions_flow.png}
+  \includegraphics[width=0.50\textwidth]{fig_q4_concept_regions_flow.png}
   \caption{多区域算电协同示意图}
   \label{fig:q4-concept}
 \end{figure}
@@ -469,7 +470,7 @@ $\mathrm{InitialSOC}_{E}=370$ MWh，并在储能优化中依据统一状态方�
 \FloatBarrier
 
 % 需要的宏包：ctex, amsmath, amssymb, booktabs, graphicx
-% 建议：\graphicspath{{figures/}}，并将 q1/outputs/figures/ 下的 png 复制到该目录
+% 图片统一放在 paper/figures/；已设置 \graphicspath{{figures/}}
 
 \subsection{问题分析}
 \label{sec:q1-analysis}
@@ -1657,7 +1658,7 @@ E\le\varepsilon.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.92\textwidth]{figures/fig_q4_baseline_panel.png}
+  \includegraphics[width=0.92\textwidth]{fig_q4_baseline_panel.png}
   \caption{基线策略比较与推荐方案。（a）四种策略的成本与碳排放；（b）四种策略的平均等待与网络时延；（c）推荐方案 \(\texttt{joint}\) 的六区净购电；（d）推荐方案的六区储能 SOC。}
   \label{fig:q4-baseline}
 \end{figure}
@@ -1684,7 +1685,7 @@ E\le\varepsilon.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.90\textwidth]{figures/fig_q4_scenarios_panel.png}
+  \includegraphics[width=0.90\textwidth]{fig_q4_scenarios_panel.png}
   \caption{三类情景波动分析结果。（a）碳约束情景的成本—碳权衡（叉号表示 \(\varepsilon\) 不可行）；（b）电价机制、新能源波动及可行碳间隙情景的成本与排放对比。}
   \label{fig:q4-scenarios}
 \end{figure}

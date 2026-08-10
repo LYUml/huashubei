@@ -2,26 +2,36 @@
 
 ## 一键复现
 
-在项目根目录运行：
+在项目根目录创建虚拟环境并安装依赖后运行（Linux / macOS）：
+
+```bash
+python3 -m venv q1/.venv
+q1/.venv/bin/pip install -r q1/requirements.txt
+q1/.venv/bin/python q1/run_q1.py
+```
+
+Windows（PowerShell）：
 
 ```powershell
-& '.\q1\.venv\Scripts\python.exe' '.\q1\run_q1.py'
+python -m venv q1\.venv
+q1\.venv\Scripts\pip install -r q1\requirements.txt
+q1\.venv\Scripts\python q1\run_q1.py
 ```
 
 在已有完整求解结果上运行补强分析（无需重新运行 180 秒 MILP）：
 
-```powershell
-& '.\q1\.venv\Scripts\python.exe' '.\q1\strengthen_q1.py'
+```bash
+q1/.venv/bin/python q1/strengthen_q1.py
 ```
 
 该脚本生成多层级预测评价、Poisson/负二项计数诊断、调度 Pareto 图，并重写无乱码的 `q1tex.md`。
 
 完整优化顺序为：
 
-```powershell
-& '.\q1\.venv\Scripts\python.exe' '.\q1\run_q1.py'
-& '.\q1\.venv\Scripts\python.exe' '.\q1\optimize_q1.py'
-& '.\q1\.venv\Scripts\python.exe' '.\q1\strengthen_q1.py'
+```bash
+q1/.venv/bin/python q1/run_q1.py
+q1/.venv/bin/python q1/optimize_q1.py
+q1/.venv/bin/python q1/strengthen_q1.py
 ```
 
 `optimize_q1.py` 使用原生 HiGHS 接口实现真实 MIP start、wait-first 字典序和 ε 约束实验。主推方案由 `recommended_schedule.json` 指定，原加权 MILP 仅保留为极限削峰对照。
